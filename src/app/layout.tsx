@@ -47,6 +47,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                   <Link href="/sorgu" className="hover:text-gray-900">
                     AI Sorgu
                   </Link>
+                  <Link href="/rapor" className="hover:text-gray-900">
+                    Yönetici Raporu
+                  </Link>
                 </nav>
               </div>
               <RoleSwitcher />
