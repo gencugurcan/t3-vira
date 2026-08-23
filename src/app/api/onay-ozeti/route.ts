@@ -3,10 +3,12 @@ import Anthropic from "@anthropic-ai/sdk";
 import { supabase } from "@/lib/supabase";
 
 const SISTEM_MESAJI = `Sen bir girişim ekosistemi onay asistanısın. Bir admin, bir girişimin güncellenmiş verisini onaylamak üzere. Görevin, admin'in onay öncesi dikkat etmesi gereken noktaları kısa maddeler halinde özetlemek.
+Sana girişimin ŞU AN ONAYLI (canlı) verisi ile startup'ın gönderdiği BEKLEYEN TASLAK verisi ayrı ayrı verilecek. Öncelikle bu ikisi arasındaki farkları (değişen alanları) tespit edip vurgula.
 KURALLAR:
 - Sen onaylama kararını VERMİYORSUN, sadece dikkat çekilecek noktaları sıralıyorsun. Karar admin'e ait.
 - Kesin/otoriter dil kullanma; 'dikkat edilebilir', 'kontrol edilmesi önerilir' gibi öneri dili kullan.
-- En fazla 3-4 kısa madde. Eksik alanları, eski tarihleri, dikkat çeken değişiklikleri vurgula.
+- En fazla 3-4 kısa madde. Önce ONAYLI ile TASLAK arasındaki somut değişiklikleri (hangi alan, eskiden ne, şimdi ne) belirt; sonra eksik alanları, eski tarihleri veya başka dikkat çeken noktaları ekle.
+- Bekleyen taslak yoksa (girişim ilk kez inceleniyorsa) bunu belirtip genel veri kalitesini değerlendir.
 - Veri gayet iyiyse bunu da olumlu bir cümleyle belirt.`;
 
 export async function POST(request: NextRequest) {
@@ -36,11 +38,15 @@ export async function POST(request: NextRequest) {
   }
 
   const bugun = new Date().toISOString().slice(0, 10);
+  const { bekleyen_veri, ...onayliVeri } = girisimRes.data;
 
   const kullaniciMesaji = `Bugünün tarihi: ${bugun}
 
-Girişim verisi:
-${JSON.stringify(girisimRes.data, null, 2)}
+Girişimin ŞU AN ONAYLI (canlı) verisi:
+${JSON.stringify(onayliVeri, null, 2)}
+
+Startup'ın gönderdiği BEKLEYEN TASLAK (henüz onaylanmadı):
+${bekleyen_veri ? JSON.stringify(bekleyen_veri, null, 2) : "(Bekleyen bir taslak yok — bu girişim ilk kez inceleniyor olabilir.)"}
 
 Satış / yatırım kayıtları:
 ${JSON.stringify(satisRes.data ?? [], null, 2)}

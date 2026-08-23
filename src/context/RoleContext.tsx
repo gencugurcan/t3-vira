@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useSyncExternalStore } from "react";
 import type { KullaniciRol } from "@/lib/types";
 
 const ROLES: { value: KullaniciRol; label: string }[] = [
@@ -10,8 +10,37 @@ const ROLES: { value: KullaniciRol; label: string }[] = [
   { value: "karar_verici", label: "Karar Verici" },
 ];
 
-const STORAGE_KEY = "t3-pusula-rol";
+const STORAGE_KEY = "t3-vira-rol";
 const DEFAULT_ROLE: KullaniciRol = "super_admin";
+const GECERLI_ROLLER = new Set(ROLES.map((r) => r.value));
+
+function gecerliRolMu(deger: string | null): deger is KullaniciRol {
+  return !!deger && GECERLI_ROLLER.has(deger as KullaniciRol);
+}
+
+// Rol seçimini localStorage'da tutuyoruz ama React'in "effect içinde
+// setState çağırma" kuralına takılmamak (ve SSR/hydration ile localStorage'ı
+// karıştırmamak) için useSyncExternalStore ile küçük bir harici store olarak
+// modelliyoruz; aynı sekme içindeki değişiklikleri de bu store bildiriyor.
+const dinleyiciler = new Set<() => void>();
+
+function bildir() {
+  dinleyiciler.forEach((dinle) => dinle());
+}
+
+function subscribe(dinle: () => void) {
+  dinleyiciler.add(dinle);
+  return () => dinleyiciler.delete(dinle);
+}
+
+function getSnapshot(): KullaniciRol {
+  const saved = window.localStorage.getItem(STORAGE_KEY);
+  return gecerliRolMu(saved) ? saved : DEFAULT_ROLE;
+}
+
+function getServerSnapshot(): KullaniciRol {
+  return DEFAULT_ROLE;
+}
 
 interface RoleContextValue {
   rol: KullaniciRol;
@@ -22,16 +51,11 @@ interface RoleContextValue {
 const RoleContext = createContext<RoleContextValue | null>(null);
 
 export function RoleProvider({ children }: { children: React.ReactNode }) {
-  const [rol, setRolState] = useState<KullaniciRol>(DEFAULT_ROLE);
-
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY) as KullaniciRol | null;
-    if (saved) setRolState(saved);
-  }, []);
+  const rol = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const setRol = (yeniRol: KullaniciRol) => {
-    setRolState(yeniRol);
-    localStorage.setItem(STORAGE_KEY, yeniRol);
+    window.localStorage.setItem(STORAGE_KEY, yeniRol);
+    bildir();
   };
 
   return (

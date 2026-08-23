@@ -21,13 +21,17 @@ const BOS_FORM: Form = {
   teknoloji: "",
 };
 
+// Bekleyen (onay bekleyen) bir taslak varsa formu ondan doldur, yoksa
+// en son onaylanmış (canlı) veriden doldur. Böylece startup, daha önce
+// gönderdiği ama henüz onaylanmamış taslağı kaybetmeden düzenlemeye devam eder.
 function girisimdenFormaCevir(g: Girisim): Form {
+  const taslak = g.bekleyen_veri;
   return {
-    ad: g.ad ?? "",
-    sektor: g.sektor ?? "",
-    kisa_aciklama: g.kisa_aciklama ?? "",
-    ekip_buyuklugu: g.ekip_buyuklugu?.toString() ?? "",
-    teknoloji: g.teknoloji?.join(", ") ?? "",
+    ad: taslak?.ad ?? g.ad ?? "",
+    sektor: (taslak?.sektor ?? g.sektor) ?? "",
+    kisa_aciklama: (taslak?.kisa_aciklama ?? g.kisa_aciklama) ?? "",
+    ekip_buyuklugu: (taslak?.ekip_buyuklugu ?? g.ekip_buyuklugu)?.toString() ?? "",
+    teknoloji: (taslak?.teknoloji ?? g.teknoloji ?? []).join(", "),
   };
 }
 
@@ -74,6 +78,9 @@ export default function PortalSayfasi() {
     );
   }
 
+  const seciliGirisim = girisimler.find((g) => g.id === seciliId) ?? null;
+  const bekleyenVarMi = !!seciliGirisim?.bekleyen_veri;
+
   function girisimSecildi(id: string) {
     setSeciliId(id);
     setMesaj(null);
@@ -93,37 +100,37 @@ export default function PortalSayfasi() {
       .map((t) => t.trim())
       .filter(Boolean);
 
+    // ÖNEMLİ: Burada girisim tablosunun canlı (onaylı) alanlarına DOKUNMUYORUZ.
+    // Değişiklik teklifi sadece bekleyen_veri JSON kolonuna yazılıyor; admin
+    // onaylayana kadar herkesin gördüğü kart eski (onaylı) veriyi göstermeye
+    // devam eder. Bu, "onay mekanizması olmadan hiçbir güncelleme canlıya
+    // geçmez" kuralını sağlamak için gerekli.
+    const bekleyenVeri = {
+      ad: form.ad,
+      sektor: form.sektor || null,
+      kisa_aciklama: form.kisa_aciklama || null,
+      ekip_buyuklugu: form.ekip_buyuklugu ? Number(form.ekip_buyuklugu) : null,
+      teknoloji: teknolojiDizisi,
+    };
+
     const { error } = await supabase
       .from("girisim")
       .update({
-        ad: form.ad,
-        sektor: form.sektor || null,
-        kisa_aciklama: form.kisa_aciklama || null,
-        ekip_buyuklugu: form.ekip_buyuklugu ? Number(form.ekip_buyuklugu) : null,
-        teknoloji: teknolojiDizisi,
+        bekleyen_veri: bekleyenVeri,
         durum: "onay_bekliyor",
-        son_guncelleme: new Date().toISOString().slice(0, 10),
       })
       .eq("id", seciliId);
 
     if (error) {
       setHata(error.message);
     } else {
-      setMesaj("Değişiklikler admin onayına gönderildi.");
+      setMesaj(
+        "Değişiklikler admin onayına gönderildi. Onaylanana kadar ekosistemde eski (onaylı) bilgilerin görünmeye devam edeceğini unutma.",
+      );
       setGirisimler((prev) =>
         prev.map((g) =>
           g.id === seciliId
-            ? {
-                ...g,
-                ad: form.ad,
-                sektor: form.sektor || null,
-                kisa_aciklama: form.kisa_aciklama || null,
-                ekip_buyuklugu: form.ekip_buyuklugu
-                  ? Number(form.ekip_buyuklugu)
-                  : null,
-                teknoloji: teknolojiDizisi,
-                durum: "onay_bekliyor",
-              }
+            ? { ...g, bekleyen_veri: bekleyenVeri, durum: "onay_bekliyor" }
             : g,
         ),
       );
@@ -162,6 +169,14 @@ export default function PortalSayfasi() {
               ))}
             </select>
           </div>
+
+          {bekleyenVarMi && (
+            <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              Bu girişim için gönderdiğin bir değişiklik hâlâ admin onayında. Aşağıda
+              son gönderdiğin taslağı görüyorsun; ekosistemde ise onaylanana kadar
+              eski (onaylı) bilgiler görünmeye devam ediyor.
+            </p>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Ad</label>

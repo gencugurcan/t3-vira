@@ -1,4 +1,4 @@
--- T3 Pusula - Supabase şema kurulumu
+-- T3 Vira - Supabase şema kurulumu
 -- Bu dosyayı Supabase SQL Editor'e yapıştır ve çalıştır.
 
 create extension if not exists "pgcrypto";
@@ -16,8 +16,12 @@ create table if not exists girisim (
   durum text not null default 'onay_bekliyor' check (durum in ('onayli', 'onay_bekliyor')),
   ai_durum text check (ai_durum in ('HAZIR', 'IZLEMEDE', 'VERI_EKSIK')),
   ai_gerekce text,
-  son_guncelleme date default current_date
+  son_guncelleme date default current_date,
+  bekleyen_veri jsonb
 );
+
+-- Bu tabloyu Role 2 daha önce oluşturduysa da (bekleyen_veri kolonu yoksa) aşağıki satır güvenle ekler:
+alter table girisim add column if not exists bekleyen_veri jsonb;
 
 -- 2. program
 create table if not exists program (
@@ -72,12 +76,24 @@ alter table kullanici enable row level security;
 alter table satis_yatirim_kaydi enable row level security;
 alter table dokuman enable row level security;
 
+drop policy if exists "public select girisim" on girisim;
+drop policy if exists "public select program" on program;
+drop policy if exists "public select girisim_program_gecmisi" on girisim_program_gecmisi;
+drop policy if exists "public select kullanici" on kullanici;
+drop policy if exists "public select satis_yatirim_kaydi" on satis_yatirim_kaydi;
+drop policy if exists "public select dokuman" on dokuman;
+drop policy if exists "public update girisim" on girisim;
+
 create policy "public select girisim" on girisim for select using (true);
 create policy "public select program" on program for select using (true);
 create policy "public select girisim_program_gecmisi" on girisim_program_gecmisi for select using (true);
 create policy "public select kullanici" on kullanici for select using (true);
 create policy "public select satis_yatirim_kaydi" on satis_yatirim_kaydi for select using (true);
 create policy "public select dokuman" on dokuman for select using (true);
+
+-- Startup portalı ve admin onay ekranı girisim satırını güncelleyebilmeli
+-- (MVP demo: gerçek login yok, anon key ile güncelleme serbest; ileride auth eklenince daraltılmalı)
+create policy "public update girisim" on girisim for update using (true) with check (true);
 
 -- Örnek veri (demo/test için)
 insert into program (ad) values ('T3 Girişim Fabrikası'), ('Teknofest Hızlandırma');

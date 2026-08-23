@@ -6,6 +6,14 @@ export type KullaniciRol =
   | "startup"
   | "karar_verici";
 
+export interface GirisimBekleyenVeri {
+  ad?: string;
+  sektor?: string | null;
+  kisa_aciklama?: string | null;
+  ekip_buyuklugu?: number | null;
+  teknoloji?: string[];
+}
+
 export interface Girisim {
   id: string;
   ad: string;
@@ -19,6 +27,7 @@ export interface Girisim {
   ai_durum: AiDurum;
   ai_gerekce: string | null;
   son_guncelleme: string | null;
+  bekleyen_veri: GirisimBekleyenVeri | null;
 }
 
 export interface Program {
