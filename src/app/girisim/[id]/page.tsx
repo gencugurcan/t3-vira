@@ -23,6 +23,27 @@ function paraFormatla(deger: number | null) {
   }).format(deger);
 }
 
+// "donem" serbest metin (örn. "2024 Güz") olarak tutuluyor, ayrı bir tarih/sıra
+// kolonu yok. Program geçmişini kronolojik göstermek için yıl + mevsimden
+// (takvimsel çeyrek: Kış < Bahar < Yaz < Güz) sıralanabilir bir değer türetiyoruz.
+const MEVSIM_SIRA: Record<string, number> = {
+  kış: 0,
+  bahar: 1,
+  yaz: 2,
+  güz: 3,
+};
+
+function donemSiraDegeri(donem: string | null): number {
+  if (!donem) return Number.MAX_SAFE_INTEGER;
+  const yilEslesme = donem.match(/\d{4}/);
+  const yil = yilEslesme ? Number(yilEslesme[0]) : 0;
+  const mevsim = donem
+    .toLowerCase()
+    .split(/\s+/)
+    .find((kelime) => kelime in MEVSIM_SIRA);
+  return yil * 4 + (mevsim ? MEVSIM_SIRA[mevsim] : 0);
+}
+
 export default async function GirisimDetaySayfasi(
   props: PageProps<"/girisim/[id]">,
 ) {
@@ -51,7 +72,9 @@ export default async function GirisimDetaySayfasi(
   }
 
   const girisim = girisimRes.data as Girisim;
-  const programGecmisi = (gecmisRes.data ?? []) as GirisimProgramGecmisi[];
+  const programGecmisi = ((gecmisRes.data ?? []) as GirisimProgramGecmisi[]).sort(
+    (a, b) => donemSiraDegeri(a.donem) - donemSiraDegeri(b.donem),
+  );
   const satisKayitlari = (satisRes.data ?? []) as SatisYatirimKaydi[];
   const dokumanlar = (dokumanRes.data ?? []) as Dokuman[];
 
