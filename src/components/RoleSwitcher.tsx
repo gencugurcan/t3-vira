@@ -1,25 +1,33 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useRole } from "@/context/RoleContext";
-import type { KullaniciRol } from "@/lib/types";
+import { useOturum } from "@/context/OturumContext";
 
 export function RoleSwitcher() {
-  const { rol, setRol, roller } = useRole();
+  const { rol, roller } = useRole();
+  const { oturum, cikisYap } = useOturum();
+  const router = useRouter();
+
+  const rolEtiketi = roller.find((r) => r.value === rol)?.label ?? rol;
+
+  function cikisYapiliyor() {
+    cikisYap();
+    router.replace("/giris");
+  }
 
   return (
-    <div className="flex items-center gap-2 text-sm">
-      <span className="text-foreground-muted">Rol:</span>
-      <select
-        value={rol}
-        onChange={(e) => setRol(e.target.value as KullaniciRol)}
-        className="rounded-lg border border-border-subtle bg-surface px-2 py-1 text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+    <div className="flex items-center gap-3 text-sm">
+      <div className="text-right leading-tight">
+        <p className="text-foreground">{oturum.ad}</p>
+        <p className="text-xs text-foreground-muted">{rolEtiketi}</p>
+      </div>
+      <button
+        onClick={cikisYapiliyor}
+        className="rounded-lg border border-border-subtle bg-surface px-3 py-1.5 text-foreground-muted transition hover:text-foreground"
       >
-        {roller.map((r) => (
-          <option key={r.value} value={r.value}>
-            {r.label}
-          </option>
-        ))}
-      </select>
+        Çıkış Yap
+      </button>
     </div>
   );
 }
