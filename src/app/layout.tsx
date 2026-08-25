@@ -32,10 +32,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
               <div className="flex items-center gap-6">
                 <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-accent text-white">
-                    V
-                  </span>
-                  T3 Vira
+                  <img src="/vira-mark.png" alt="Vira" className="h-6 w-auto" />
+                  vira
                 </Link>
                 <nav className="flex items-center gap-4 text-sm text-foreground-muted">
                   <Link href="/" className="transition hover:text-foreground">
