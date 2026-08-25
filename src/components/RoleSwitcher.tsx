@@ -17,14 +17,14 @@ export function RoleSwitcher() {
   }
 
   return (
-    <div className="flex items-center gap-3 text-sm">
-      <div className="text-right leading-tight">
+    <div className="space-y-2 text-sm">
+      <div className="leading-tight">
         <p className="text-foreground">{oturum.ad}</p>
         <p className="text-xs text-foreground-muted">{rolEtiketi}</p>
       </div>
       <button
         onClick={cikisYapiliyor}
-        className="rounded-lg border border-border-subtle bg-surface px-3 py-1.5 text-foreground-muted transition hover:text-foreground"
+        className="w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-1.5 text-left text-foreground-muted transition hover:text-foreground"
       >
         Çıkış Yap
       </button>

@@ -206,7 +206,7 @@ export default function OnaySayfasi() {
                 <button
                   onClick={() => ozetGetir(g.id)}
                   disabled={ozetYukleniyor[g.id]}
-                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
                 >
                   {ozetYukleniyor[g.id] ? "Analiz ediliyor..." : "AI Onay Özeti"}
                 </button>

@@ -91,7 +91,7 @@ export default function RaporSayfasi() {
         <button
           onClick={raporOlustur}
           disabled={yukleniyor}
-          className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-base font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+          className="w-full rounded-lg bg-accent px-4 py-3 text-base font-semibold text-white hover:opacity-90 disabled:opacity-50"
         >
           {yukleniyor ? "Rapor hazırlanıyor..." : "Rapor Oluştur"}
         </button>
