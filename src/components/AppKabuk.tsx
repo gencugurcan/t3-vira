@@ -19,7 +19,7 @@ const NAV_ITEMS: {
     href: "/portal",
     label: "Portal",
     icon: IconEdit,
-    roller: ["startup", "program_yoneticisi", "super_admin"],
+    roller: ["startup", "program_yoneticisi"],
   },
   { href: "/onay", label: "Onay Kuyruğu", icon: IconCheckSquare, roller: ["super_admin"] },
   {
