@@ -4,9 +4,9 @@ import { useState } from "react";
 import type { AiDurum } from "@/lib/types";
 
 const AI_DURUM_RENK: Record<string, string> = {
-  HAZIR: "bg-green-100 text-green-800",
-  IZLEMEDE: "bg-yellow-100 text-yellow-800",
-  VERI_EKSIK: "bg-red-100 text-red-800",
+  HAZIR: "bg-[var(--success-soft)] text-success",
+  IZLEMEDE: "bg-[var(--warning-soft)] text-warning",
+  VERI_EKSIK: "bg-[var(--danger-soft)] text-danger",
 };
 
 interface Props {
@@ -44,12 +44,12 @@ export function AiDegerlendirme({ girisimId, initialAiDurum, initialAiGerekce }:
   }
 
   return (
-    <div className="mt-4 border-t border-gray-100 pt-4">
+    <div className="mt-4 border-t border-border-subtle pt-4">
       <div className="flex flex-wrap items-center gap-3">
         {aiDurum && (
           <span
             className={`rounded-full px-3 py-1 text-xs font-medium ${
-              AI_DURUM_RENK[aiDurum] ?? "bg-gray-100 text-gray-700"
+              AI_DURUM_RENK[aiDurum] ?? "bg-surface-2 text-foreground-muted"
             }`}
           >
             AI: {aiDurum}
@@ -58,17 +58,17 @@ export function AiDegerlendirme({ girisimId, initialAiDurum, initialAiGerekce }:
         <button
           onClick={degerlendir}
           disabled={yukleniyor}
-          className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+          className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
         >
           {yukleniyor ? "Değerlendiriliyor..." : "AI Değerlendirmesi Yap"}
         </button>
       </div>
 
       {aiGerekce && (
-        <p className="mt-2 text-xs text-gray-500">AI gerekçesi: {aiGerekce}</p>
+        <p className="mt-2 text-xs text-foreground-muted">AI gerekçesi: {aiGerekce}</p>
       )}
       {hata && (
-        <p className="mt-2 text-xs text-red-600">Hata: {hata}</p>
+        <p className="mt-2 text-xs text-danger">Hata: {hata}</p>
       )}
     </div>
   );

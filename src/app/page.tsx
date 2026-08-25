@@ -6,14 +6,14 @@ import { supabase } from "@/lib/supabase";
 import type { Girisim, Program } from "@/lib/types";
 
 const AI_DURUM_RENK: Record<string, string> = {
-  HAZIR: "bg-green-100 text-green-800",
-  IZLEMEDE: "bg-yellow-100 text-yellow-800",
-  VERI_EKSIK: "bg-red-100 text-red-800",
+  HAZIR: "bg-[var(--success-soft)] text-success",
+  IZLEMEDE: "bg-[var(--warning-soft)] text-warning",
+  VERI_EKSIK: "bg-[var(--danger-soft)] text-danger",
 };
 
 const DURUM_RENK: Record<string, string> = {
-  onayli: "bg-blue-100 text-blue-800",
-  onay_bekliyor: "bg-gray-100 text-gray-700",
+  onayli: "bg-[var(--accent-soft)] text-accent",
+  onay_bekliyor: "bg-surface-2 text-foreground-muted",
 };
 
 export default function AnaSayfa() {
@@ -78,18 +78,45 @@ export default function AnaSayfa() {
     });
   }, [girisimler, sektorFiltre, programFiltre, girisimProgramMap]);
 
+  const toplamGirisim = girisimler.length;
+  const onayliSayisi = girisimler.filter((g) => g.durum === "onayli").length;
+  const bekleyenSayisi = girisimler.filter((g) => g.durum === "onay_bekliyor").length;
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900">Girişimler</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        Ekosistemdeki tüm girişimleri görüntüle ve filtrele.
-      </p>
+      <div className="relative overflow-hidden rounded-3xl border border-border-subtle bg-surface p-8">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-accent-2/10 blur-3xl" />
+        <div className="relative">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Girişimler
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-foreground-muted">
+            Ekosistemdeki tüm girişimleri görüntüle ve filtrele.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <div className="rounded-2xl border border-border-subtle bg-surface-2 px-4 py-3">
+              <p className="text-2xl font-semibold text-foreground">{toplamGirisim}</p>
+              <p className="text-xs text-foreground-muted">Toplam Girişim</p>
+            </div>
+            <div className="rounded-2xl border border-border-subtle bg-surface-2 px-4 py-3">
+              <p className="text-2xl font-semibold text-accent">{onayliSayisi}</p>
+              <p className="text-xs text-foreground-muted">Onaylı</p>
+            </div>
+            <div className="rounded-2xl border border-border-subtle bg-surface-2 px-4 py-3">
+              <p className="text-2xl font-semibold text-warning">{bekleyenSayisi}</p>
+              <p className="text-xs text-foreground-muted">Onay Bekliyor</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="mt-6 flex flex-wrap gap-3">
         <select
           value={sektorFiltre}
           onChange={(e) => setSektorFiltre(e.target.value)}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800"
+          className="rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
         >
           <option value="">Tüm sektörler</option>
           {sektorler.map((s) => (
@@ -102,7 +129,7 @@ export default function AnaSayfa() {
         <select
           value={programFiltre}
           onChange={(e) => setProgramFiltre(e.target.value)}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800"
+          className="rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
         >
           <option value="">Tüm programlar</option>
           {programlar.map((p) => (
@@ -114,44 +141,46 @@ export default function AnaSayfa() {
       </div>
 
       {yukleniyor && (
-        <p className="mt-8 text-sm text-gray-500">Yükleniyor...</p>
+        <p className="mt-8 text-sm text-foreground-muted">Yükleniyor...</p>
       )}
 
       {hata && (
-        <p className="mt-8 text-sm text-red-600">
+        <p className="mt-8 text-sm text-danger">
           Veri alınamadı: {hata}
         </p>
       )}
 
       {!yukleniyor && !hata && filtrelenmis.length === 0 && (
-        <p className="mt-8 text-sm text-gray-500">Kayıt bulunamadı.</p>
+        <p className="mt-8 text-sm text-foreground-muted">Kayıt bulunamadı.</p>
       )}
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filtrelenmis.map((g) => (
+        {filtrelenmis.map((g, index) => (
           <Link
             key={g.id}
             href={`/girisim/${g.id}`}
-            className="block rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+            className={`group block rounded-3xl border border-border-subtle bg-surface p-5 transition hover:-translate-y-0.5 hover:border-accent/40 hover:bg-surface-2 ${
+              index === 0 && filtrelenmis.length >= 3 ? "sm:col-span-2" : ""
+            }`}
           >
             <div className="flex items-start justify-between gap-2">
-              <h2 className="text-base font-semibold text-gray-900">{g.ad}</h2>
+              <h2 className="text-base font-semibold text-foreground">{g.ad}</h2>
               <span
                 className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                  DURUM_RENK[g.durum] ?? "bg-gray-100 text-gray-700"
+                  DURUM_RENK[g.durum] ?? "bg-surface-2 text-foreground-muted"
                 }`}
               >
                 {g.durum === "onayli" ? "Onaylı" : "Onay Bekliyor"}
               </span>
             </div>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-foreground-muted">
               {g.sektor ?? "Sektör belirtilmemiş"}
               {g.kurulus_yili ? ` · ${g.kurulus_yili}` : ""}
             </p>
 
             {g.kisa_aciklama && (
-              <p className="mt-2 line-clamp-2 text-sm text-gray-600">
+              <p className="mt-2 line-clamp-2 text-sm text-foreground-muted">
                 {g.kisa_aciklama}
               </p>
             )}
@@ -159,7 +188,7 @@ export default function AnaSayfa() {
             {g.ai_durum && (
               <span
                 className={`mt-3 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                  AI_DURUM_RENK[g.ai_durum] ?? "bg-gray-100 text-gray-700"
+                  AI_DURUM_RENK[g.ai_durum] ?? "bg-surface-2 text-foreground-muted"
                 }`}
               >
                 AI: {g.ai_durum}

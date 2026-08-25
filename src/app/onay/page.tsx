@@ -159,7 +159,7 @@ export default function OnaySayfasi() {
   if (rol !== "super_admin") {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8">
-        <p className="rounded-md bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+        <p className="rounded-lg bg-[var(--warning-soft)] px-4 py-3 text-sm text-warning">
           Bu sayfa sadece Süper Admin rolü içindir.
         </p>
       </div>
@@ -168,59 +168,59 @@ export default function OnaySayfasi() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900">Admin Onay Kuyruğu</h1>
-      <p className="mt-1 text-sm text-gray-500">
+      <h1 className="text-2xl font-bold text-foreground">Admin Onay Kuyruğu</h1>
+      <p className="mt-1 text-sm text-foreground-muted">
         Onay bekleyen girişim güncellemeleri.
       </p>
 
-      {yukleniyor && <p className="mt-6 text-sm text-gray-500">Yükleniyor...</p>}
+      {yukleniyor && <p className="mt-6 text-sm text-foreground-muted">Yükleniyor...</p>}
 
       {hata && (
-        <p className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
+        <p className="mt-6 rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
           Hata: {hata}
         </p>
       )}
 
       {!yukleniyor && girisimler.length === 0 && !hata && (
-        <p className="mt-6 text-sm text-gray-500">Onay bekleyen girişim yok.</p>
+        <p className="mt-6 text-sm text-foreground-muted">Onay bekleyen girişim yok.</p>
       )}
 
       <div className="mt-6 space-y-3">
         {girisimler.map((g) => (
           <div
             key={g.id}
-            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+            className="rounded-2xl border border-border-subtle bg-surface p-4 shadow-sm"
           >
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="font-semibold text-gray-900">{g.ad}</p>
-                <p className="text-sm text-gray-500">
+                <p className="font-semibold text-foreground">{g.ad}</p>
+                <p className="text-sm text-foreground-muted">
                   {g.sektor ?? "Sektör belirtilmemiş"}
                   {g.son_guncelleme ? ` · Güncelleme: ${g.son_guncelleme}` : ""}
                 </p>
                 {g.kisa_aciklama && (
-                  <p className="mt-1 text-sm text-gray-600">{g.kisa_aciklama}</p>
+                  <p className="mt-1 text-sm text-foreground-muted">{g.kisa_aciklama}</p>
                 )}
               </div>
               <div className="flex shrink-0 gap-2">
                 <button
                   onClick={() => ozetGetir(g.id)}
                   disabled={ozetYukleniyor[g.id]}
-                  className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                 >
                   {ozetYukleniyor[g.id] ? "Analiz ediliyor..." : "AI Onay Özeti"}
                 </button>
                 <button
                   onClick={() => onayla(g)}
                   disabled={islemdeId === g.id}
-                  className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                  className="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                 >
                   Onayla
                 </button>
                 <button
                   onClick={() => reddet(g)}
                   disabled={islemdeId === g.id}
-                  className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                  className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
                 >
                   Reddet
                 </button>
@@ -228,13 +228,13 @@ export default function OnaySayfasi() {
             </div>
 
             {degisenAlanlar(g).length > 0 && (
-              <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
-                <p className="text-xs font-semibold uppercase text-amber-800">
+              <div className="mt-3 rounded-lg border border-border-subtle bg-[var(--warning-soft)] px-3 py-2">
+                <p className="text-xs font-semibold uppercase text-warning">
                   Startup&apos;ın önerdiği değişiklikler
                 </p>
                 <ul className="mt-1 space-y-1">
                   {degisenAlanlar(g).map((fark) => (
-                    <li key={fark.alan} className="text-sm text-amber-900">
+                    <li key={fark.alan} className="text-sm text-foreground">
                       <span className="font-medium">{fark.alan}:</span>{" "}
                       <span className="line-through opacity-60">{fark.eski}</span>{" "}
                       → <span className="font-medium">{fark.yeni}</span>
@@ -245,12 +245,12 @@ export default function OnaySayfasi() {
             )}
 
             {ozetler[g.id] && (
-              <div className="mt-3 whitespace-pre-line rounded-md bg-indigo-50 px-3 py-2 text-sm text-indigo-900">
+              <div className="mt-3 whitespace-pre-line rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-sm text-foreground">
                 {ozetler[g.id]}
               </div>
             )}
             {ozetHata[g.id] && (
-              <p className="mt-2 text-xs text-red-600">Hata: {ozetHata[g.id]}</p>
+              <p className="mt-2 text-xs text-danger">Hata: {ozetHata[g.id]}</p>
             )}
           </div>
         ))}

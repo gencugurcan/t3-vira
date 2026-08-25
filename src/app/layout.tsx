@@ -26,28 +26,31 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="tr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-gray-50">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         <RoleProvider>
-          <header className="border-b border-gray-200 bg-white">
+          <header className="sticky top-0 z-10 border-b border-border-subtle bg-background/80 backdrop-blur">
             <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
               <div className="flex items-center gap-6">
-                <Link href="/" className="text-lg font-semibold text-gray-900">
+                <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-accent text-white">
+                    V
+                  </span>
                   T3 Vira
                 </Link>
-                <nav className="flex items-center gap-4 text-sm text-gray-600">
-                  <Link href="/" className="hover:text-gray-900">
+                <nav className="flex items-center gap-4 text-sm text-foreground-muted">
+                  <Link href="/" className="transition hover:text-foreground">
                     Ana Sayfa
                   </Link>
-                  <Link href="/portal" className="hover:text-gray-900">
+                  <Link href="/portal" className="transition hover:text-foreground">
                     Portal
                   </Link>
-                  <Link href="/onay" className="hover:text-gray-900">
+                  <Link href="/onay" className="transition hover:text-foreground">
                     Onay Kuyruğu
                   </Link>
-                  <Link href="/sorgu" className="hover:text-gray-900">
+                  <Link href="/sorgu" className="transition hover:text-foreground">
                     AI Sorgu
                   </Link>
-                  <Link href="/rapor" className="hover:text-gray-900">
+                  <Link href="/rapor" className="transition hover:text-foreground">
                     Yönetici Raporu
                   </Link>
                 </nav>

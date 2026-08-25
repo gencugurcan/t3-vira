@@ -10,8 +10,8 @@ import type {
 } from "@/lib/types";
 
 const DURUM_RENK: Record<string, string> = {
-  onayli: "bg-blue-100 text-blue-800",
-  onay_bekliyor: "bg-gray-100 text-gray-700",
+  onayli: "bg-[var(--accent-soft)] text-accent",
+  onay_bekliyor: "bg-surface-2 text-foreground-muted",
 };
 
 function paraFormatla(deger: number | null) {
@@ -80,16 +80,16 @@ export default async function GirisimDetaySayfasi(
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <Link href="/" className="text-sm text-blue-600 hover:underline">
+      <Link href="/" className="text-sm text-accent hover:underline">
         ← Girişimlere dön
       </Link>
 
       {/* Genel bilgi */}
-      <div className="mt-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="mt-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{girisim.ad}</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-foreground">{girisim.ad}</h1>
+            <p className="mt-1 text-sm text-foreground-muted">
               {girisim.sektor ?? "Sektör belirtilmemiş"}
               {girisim.kurulus_yili ? ` · Kuruluş: ${girisim.kurulus_yili}` : ""}
             </p>
@@ -97,7 +97,7 @@ export default async function GirisimDetaySayfasi(
           <div className="flex gap-2">
             <span
               className={`rounded-full px-3 py-1 text-xs font-medium ${
-                DURUM_RENK[girisim.durum] ?? "bg-gray-100 text-gray-700"
+                DURUM_RENK[girisim.durum] ?? "bg-surface-2 text-foreground-muted"
               }`}
             >
               {girisim.durum === "onayli" ? "Onaylı" : "Onay Bekliyor"}
@@ -106,7 +106,7 @@ export default async function GirisimDetaySayfasi(
         </div>
 
         {girisim.kisa_aciklama && (
-          <p className="mt-4 text-sm text-gray-700">{girisim.kisa_aciklama}</p>
+          <p className="mt-4 text-sm text-foreground-muted">{girisim.kisa_aciklama}</p>
         )}
 
         <AiDegerlendirme
@@ -117,14 +117,14 @@ export default async function GirisimDetaySayfasi(
 
         <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div>
-            <dt className="text-xs text-gray-500">Ekip Büyüklüğü</dt>
-            <dd className="text-sm font-medium text-gray-900">
+            <dt className="text-xs text-foreground-muted">Ekip Büyüklüğü</dt>
+            <dd className="text-sm font-medium text-foreground">
               {girisim.ekip_buyuklugu ?? "-"}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500">Son Güncelleme</dt>
-            <dd className="text-sm font-medium text-gray-900">
+            <dt className="text-xs text-foreground-muted">Son Güncelleme</dt>
+            <dd className="text-sm font-medium text-foreground">
               {girisim.son_guncelleme ?? "-"}
             </dd>
           </div>
@@ -132,14 +132,14 @@ export default async function GirisimDetaySayfasi(
 
         {girisim.teknoloji && girisim.teknoloji.length > 0 && (
           <div className="mt-6">
-            <h3 className="text-xs font-semibold uppercase text-gray-500">
+            <h3 className="text-xs font-semibold uppercase text-foreground-muted">
               Teknoloji
             </h3>
             <div className="mt-2 flex flex-wrap gap-2">
               {girisim.teknoloji.map((t) => (
                 <span
                   key={t}
-                  className="rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700"
+                  className="rounded-lg bg-surface-2 px-2 py-1 text-xs text-foreground-muted"
                 >
                   {t}
                 </span>
@@ -150,28 +150,28 @@ export default async function GirisimDetaySayfasi(
       </div>
 
       {/* Program geçmişi - timeline */}
-      <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">Program Geçmişi</h2>
+      <div className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">Program Geçmişi</h2>
         {programGecmisi.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-500">Kayıt yok.</p>
+          <p className="mt-2 text-sm text-foreground-muted">Kayıt yok.</p>
         ) : (
-          <ol className="mt-4 space-y-4 border-l border-gray-200 pl-4">
+          <ol className="mt-4 space-y-4 border-l border-border-subtle pl-4">
             {programGecmisi.map((kayit) => (
               <li key={kayit.id} className="relative">
-                <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-blue-600" />
-                <p className="text-sm font-medium text-gray-900">
+                <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-accent" />
+                <p className="text-sm font-medium text-foreground">
                   {kayit.program?.ad ?? "Program"}{" "}
                   {kayit.donem && (
-                    <span className="font-normal text-gray-500">
+                    <span className="font-normal text-foreground-muted">
                       · {kayit.donem}
                     </span>
                   )}
                 </p>
                 {kayit.durum && (
-                  <p className="text-xs text-gray-500">Durum: {kayit.durum}</p>
+                  <p className="text-xs text-foreground-muted">Durum: {kayit.durum}</p>
                 )}
                 {kayit.onemli_adimlar && (
-                  <p className="mt-1 text-sm text-gray-600">
+                  <p className="mt-1 text-sm text-foreground-muted">
                     {kayit.onemli_adimlar}
                   </p>
                 )}
@@ -182,17 +182,17 @@ export default async function GirisimDetaySayfasi(
       </div>
 
       {/* Satış / yatırım kayıtları */}
-      <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">
+      <div className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">
           Satış / Yatırım Kayıtları
         </h2>
         {satisKayitlari.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-500">Kayıt yok.</p>
+          <p className="mt-2 text-sm text-foreground-muted">Kayıt yok.</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-xs uppercase text-gray-500">
+                <tr className="border-b border-border-subtle text-xs uppercase text-foreground-muted">
                   <th className="py-2 pr-4">Tarih</th>
                   <th className="py-2 pr-4">Ciro</th>
                   <th className="py-2 pr-4">İhracat</th>
@@ -203,7 +203,7 @@ export default async function GirisimDetaySayfasi(
               </thead>
               <tbody>
                 {satisKayitlari.map((k) => (
-                  <tr key={k.id} className="border-b border-gray-100">
+                  <tr key={k.id} className="border-b border-border-subtle">
                     <td className="py-2 pr-4">{k.tarih ?? "-"}</td>
                     <td className="py-2 pr-4">{paraFormatla(k.ciro)}</td>
                     <td className="py-2 pr-4">{paraFormatla(k.ihracat)}</td>
@@ -219,16 +219,16 @@ export default async function GirisimDetaySayfasi(
       </div>
 
       {/* Dokümanlar */}
-      <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">Dokümanlar</h2>
+      <div className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">Dokümanlar</h2>
         {dokumanlar.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-500">Kayıt yok.</p>
+          <p className="mt-2 text-sm text-foreground-muted">Kayıt yok.</p>
         ) : (
-          <ul className="mt-4 divide-y divide-gray-100">
+          <ul className="mt-4 divide-y divide-border-subtle">
             {dokumanlar.map((d) => (
               <li key={d.id} className="flex items-center justify-between py-2 text-sm">
-                <span className="text-gray-900">{d.dosya ?? "İsimsiz dosya"}</span>
-                <span className="text-gray-500">
+                <span className="text-foreground">{d.dosya ?? "İsimsiz dosya"}</span>
+                <span className="text-foreground-muted">
                   {d.tur ?? "-"} · {d.yukleme_tarihi ?? "-"}
                 </span>
               </li>
