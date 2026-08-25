@@ -1,0 +1,278 @@
+/* ==========================================================
+   VIRA — PARALLAX GİRİŞ PROTOTİPİ / STİL DOSYASI
+   Renk paleti, ana Vira uygulamasının (src/app/globals.css)
+   lacivert/indigo temasıyla uyumlu olacak şekilde seçildi.
+   ========================================================== */
+
+:root {
+  /* Ana uygulamadaki tema değişkenleriyle aynı paletten alındı */
+  --renk-arkaplan: #0b0c18;
+  --renk-yuzey: #141726;
+  --renk-yuzey-2: #1b1f33;
+  --renk-kenarlik: #262a42;
+  --renk-metin: #f2f3f8;
+  --renk-metin-soluk: #8b8fa6;
+  --renk-vurgu: #4f6ef7;
+  --renk-vurgu-2: #7bb8ef;
+
+  /* === RESİM 1 BURAYA === */
+  --bg-1: url("https://placehold.co/1920x1080/141726/4f6ef7?text=Bolum+1");
+
+  /* === RESİM 2 BURAYA === */
+  --bg-2: url("https://placehold.co/1920x1080/1b1f33/7bb8ef?text=Bolum+2");
+
+  /* === RESİM 3 BURAYA === */
+  --bg-3: url("https://placehold.co/1920x1080/0b0c18/4f6ef7?text=Bolum+3");
+
+  /* === RESİM 4 BURAYA === */
+  --bg-4: url("https://placehold.co/1920x1080/141726/7bb8ef?text=Bolum+4");
+
+  /* === RESİM LOGIN BURAYA === */
+  --bg-login: url("https://placehold.co/1920x1080/0b0c18/4f6ef7?text=Giris");
+}
+
+/* ---------- Genel sıfırlama ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  /* Parallax katmanları taşarsa yatay scroll bar çıkmasın diye önlem */
+  overflow-x: hidden;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--renk-arkaplan);
+  color: var(--renk-metin);
+  line-height: 1.5;
+}
+
+h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+
+/* ==========================================================
+   PARALLAX BÖLÜMLERİ (1-4)
+   ========================================================== */
+
+.section {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* .bg katmanı sınırların dışına taşmasın diye kırpma */
+  overflow: hidden;
+}
+
+/* Her section'ın arka plan katmanı: mutlak konum, en arkada (z-index -1) */
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+}
+
+.bg-1 {
+  background-image: var(--bg-1);
+}
+.bg-2 {
+  background-image: var(--bg-2);
+}
+.bg-3 {
+  background-image: var(--bg-3);
+}
+.bg-4 {
+  background-image: var(--bg-4);
+}
+
+.section-icerik {
+  position: relative;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+
+.section-icerik h1 {
+  font-size: clamp(2rem, 6vw, 4rem);
+  color: var(--renk-metin);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
+}
+
+
+/* ==========================================================
+   LOGIN BÖLÜMÜ
+   Kasıtlı olarak yukarıdaki .section bloğundan AYRI tutuldu ki
+   hem CSS hem de script.js tarafında kolayca bulunup düzenlenebilsin.
+   ========================================================== */
+
+.login-bolumu {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2rem 1.5rem;
+}
+
+/* Login bölümünün sabit arka plan görseli (parallax YOK, sadece cover) */
+.login-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: var(--bg-login);
+  background-size: cover;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+}
+
+/* Görselin üzerine koyu/lacivert tonlarda bir katman: kartın okunabilirliği
+   ve mevcut Vira temasıyla renk uyumu için */
+.login-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(11, 12, 24, 0.75) 0%,
+    rgba(11, 12, 24, 0.9) 100%
+  );
+}
+
+/* ---------- Login kartı ---------- */
+.login-kart {
+  position: relative;
+  width: min(92vw, 400px);
+  background: rgba(20, 23, 38, 0.6);
+  border: 1px solid rgba(242, 243, 248, 0.08);
+  border-radius: 1.5rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  /* Yarı saydam + blur: "cam" efekti */
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: 2.5rem 2rem;
+}
+
+.login-logo-yeri {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-logo-placeholder {
+  display: inline-block;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--renk-vurgu-2);
+}
+
+.login-alt-baslik {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--renk-metin-soluk);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.form-alani {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-alani label {
+  font-size: 0.8rem;
+  color: var(--renk-metin-soluk);
+}
+
+.form-alani input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--renk-kenarlik);
+  background: rgba(11, 12, 24, 0.55);
+  color: var(--renk-metin);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-alani input::placeholder {
+  color: var(--renk-metin-soluk);
+}
+
+.form-alani input:focus {
+  border-color: var(--renk-vurgu);
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.25);
+}
+
+.giris-butonu {
+  margin-top: 0.4rem;
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: var(--renk-vurgu);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.giris-butonu:hover {
+  background: #3f5adf;
+}
+
+.giris-butonu:active {
+  transform: scale(0.98);
+}
+
+/* "Şifremi unuttum" — buton olarak yazıldı ama link gibi göründüğü için
+   tüm buton görünümü (arka plan, kenarlık) sıfırlanıyor */
+.sifremi-unuttum {
+  align-self: center;
+  margin-top: 0.2rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--renk-vurgu-2);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sifremi-unuttum:hover {
+  color: var(--renk-metin);
+}
+
+
+/* ==========================================================
+   RESPONSIVE / MOBİL AYARLARI
+   ========================================================== */
+
+@media (max-width: 640px) {
+  .login-kart {
+    padding: 2rem 1.25rem;
+    border-radius: 1.25rem;
+  }
+
+  .section-icerik h1 {
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+  }
+}
