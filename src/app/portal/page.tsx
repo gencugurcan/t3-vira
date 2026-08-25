@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRole } from "@/context/RoleContext";
 import { supabase } from "@/lib/supabase";
-import type { Girisim } from "@/lib/types";
+import type { Girisim, Program } from "@/lib/types";
 
 interface Form {
   ad: string;
@@ -20,6 +20,45 @@ const BOS_FORM: Form = {
   ekip_buyuklugu: "",
   teknoloji: "",
 };
+
+interface YeniGirisimForm {
+  ad: string;
+  sektor: string;
+  kurulus_yili: string;
+  kisa_aciklama: string;
+  ekip_buyuklugu: string;
+  teknoloji: string;
+}
+
+const BOS_YENI_GIRISIM_FORM: YeniGirisimForm = {
+  ad: "",
+  sektor: "",
+  kurulus_yili: "",
+  kisa_aciklama: "",
+  ekip_buyuklugu: "",
+  teknoloji: "",
+};
+
+interface NotForm {
+  programId: string;
+  donem: string;
+  durum: string;
+  onemliAdimlar: string;
+}
+
+const BOS_NOT_FORM: NotForm = {
+  programId: "",
+  donem: "",
+  durum: "",
+  onemliAdimlar: "",
+};
+
+interface BelgeForm {
+  dosya: string;
+  tur: string;
+}
+
+const BOS_BELGE_FORM: BelgeForm = { dosya: "", tur: "" };
 
 // Bekleyen (onay bekleyen) bir taslak varsa formu ondan doldur, yoksa
 // en son onaylanmış (canlı) veriden doldur. Böylece startup, daha önce
@@ -46,8 +85,25 @@ export default function PortalSayfasi() {
   const [mesaj, setMesaj] = useState<string | null>(null);
   const [hata, setHata] = useState<string | null>(null);
 
+  const [yeniGirisimAcik, setYeniGirisimAcik] = useState(false);
+  const [yeniGirisimForm, setYeniGirisimForm] = useState<YeniGirisimForm>(BOS_YENI_GIRISIM_FORM);
+  const [yeniGirisimKaydediliyor, setYeniGirisimKaydediliyor] = useState(false);
+  const [yeniGirisimMesaj, setYeniGirisimMesaj] = useState<string | null>(null);
+  const [yeniGirisimHata, setYeniGirisimHata] = useState<string | null>(null);
+
+  const [programlar, setProgramlar] = useState<Program[]>([]);
+  const [notForm, setNotForm] = useState<NotForm>(BOS_NOT_FORM);
+  const [notKaydediliyor, setNotKaydediliyor] = useState(false);
+  const [notMesaj, setNotMesaj] = useState<string | null>(null);
+  const [notHata, setNotHata] = useState<string | null>(null);
+
+  const [belgeForm, setBelgeForm] = useState<BelgeForm>(BOS_BELGE_FORM);
+  const [belgeKaydediliyor, setBelgeKaydediliyor] = useState(false);
+  const [belgeMesaj, setBelgeMesaj] = useState<string | null>(null);
+  const [belgeHata, setBelgeHata] = useState<string | null>(null);
+
   useEffect(() => {
-    if (rol !== "startup") return;
+    if (rol !== "startup" && rol !== "program_yoneticisi") return;
     async function girisimleriGetir() {
       setYukleniyor(true);
       const { data, error } = await supabase
@@ -68,15 +124,30 @@ export default function PortalSayfasi() {
     girisimleriGetir();
   }, [rol]);
 
-  if (rol !== "startup") {
+  useEffect(() => {
+    if (rol !== "program_yoneticisi") return;
+    async function programlariGetir() {
+      const { data, error } = await supabase.from("program").select("*").order("ad");
+      if (!error && data) setProgramlar(data as Program[]);
+    }
+    programlariGetir();
+  }, [rol]);
+
+  if (rol !== "startup" && rol !== "program_yoneticisi") {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8">
         <p className="rounded-lg bg-[var(--warning-soft)] px-4 py-3 text-sm text-warning">
-          Bu sayfa sadece Startup rolü içindir.
+          Bu sayfa sadece Startup ve Program Yöneticisi rolleri içindir.
         </p>
       </div>
     );
   }
+
+  const baslik = rol === "program_yoneticisi" ? "Program Yönetimi" : "Startup Portalı";
+  const aciklama =
+    rol === "program_yoneticisi"
+      ? "Sorumlu olduğun programdaki girişimleri ekle, güncelle, program notu ekle."
+      : "Girişim bilgilerini güncelle. Kaydettiğinde değişiklikler admin onayına düşer.";
 
   const seciliGirisim = girisimler.find((g) => g.id === seciliId) ?? null;
   const bekleyenVarMi = !!seciliGirisim?.bekleyen_veri;
@@ -138,12 +209,92 @@ export default function PortalSayfasi() {
     setKaydediliyor(false);
   }
 
+  async function yeniGirisimEkle() {
+    if (!yeniGirisimForm.ad.trim()) return;
+    setYeniGirisimKaydediliyor(true);
+    setYeniGirisimMesaj(null);
+    setYeniGirisimHata(null);
+
+    const teknolojiDizisi = yeniGirisimForm.teknoloji
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    const { data, error } = await supabase
+      .from("girisim")
+      .insert({
+        ad: yeniGirisimForm.ad.trim(),
+        sektor: yeniGirisimForm.sektor || null,
+        kurulus_yili: yeniGirisimForm.kurulus_yili ? Number(yeniGirisimForm.kurulus_yili) : null,
+        kisa_aciklama: yeniGirisimForm.kisa_aciklama || null,
+        ekip_buyuklugu: yeniGirisimForm.ekip_buyuklugu
+          ? Number(yeniGirisimForm.ekip_buyuklugu)
+          : null,
+        teknoloji: teknolojiDizisi,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      setYeniGirisimHata(error.message);
+    } else if (data) {
+      setYeniGirisimMesaj("Girişim eklendi, admin onayına düştü.");
+      setYeniGirisimForm(BOS_YENI_GIRISIM_FORM);
+      setGirisimler((prev) =>
+        [...prev, data as Girisim].sort((a, b) => a.ad.localeCompare(b.ad, "tr")),
+      );
+    }
+    setYeniGirisimKaydediliyor(false);
+  }
+
+  async function notEkle() {
+    if (!seciliId || !notForm.programId) return;
+    setNotKaydediliyor(true);
+    setNotMesaj(null);
+    setNotHata(null);
+
+    const { error } = await supabase.from("girisim_program_gecmisi").insert({
+      girisim_id: seciliId,
+      program_id: notForm.programId,
+      donem: notForm.donem || null,
+      durum: notForm.durum || null,
+      onemli_adimlar: notForm.onemliAdimlar || null,
+    });
+
+    if (error) {
+      setNotHata(error.message);
+    } else {
+      setNotMesaj("Not eklendi.");
+      setNotForm(BOS_NOT_FORM);
+    }
+    setNotKaydediliyor(false);
+  }
+
+  async function belgeEkle() {
+    if (!seciliId || !belgeForm.dosya.trim()) return;
+    setBelgeKaydediliyor(true);
+    setBelgeMesaj(null);
+    setBelgeHata(null);
+
+    const { error } = await supabase.from("dokuman").insert({
+      girisim_id: seciliId,
+      dosya: belgeForm.dosya.trim(),
+      tur: belgeForm.tur || null,
+    });
+
+    if (error) {
+      setBelgeHata(error.message);
+    } else {
+      setBelgeMesaj("Belge eklendi.");
+      setBelgeForm(BOS_BELGE_FORM);
+    }
+    setBelgeKaydediliyor(false);
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground">Startup Portalı</h1>
-      <p className="mt-1 text-sm text-foreground-muted">
-        Girişim bilgilerini güncelle. Kaydettiğinde değişiklikler admin onayına düşer.
-      </p>
+      <h1 className="text-2xl font-bold text-foreground">{baslik}</h1>
+      <p className="mt-1 text-sm text-foreground-muted">{aciklama}</p>
 
       {yukleniyor && <p className="mt-6 text-sm text-foreground-muted">Yükleniyor...</p>}
 
@@ -252,6 +403,262 @@ export default function PortalSayfasi() {
             className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
             {kaydediliyor ? "Kaydediliyor..." : "Kaydet"}
+          </button>
+        </div>
+      )}
+
+      {!yukleniyor && rol === "program_yoneticisi" && (
+        <div className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+          <button
+            onClick={() => setYeniGirisimAcik((v) => !v)}
+            className="flex w-full items-center justify-between text-left"
+          >
+            <span className="text-lg font-semibold text-foreground">Yeni Girişim Ekle</span>
+            <span className="text-sm text-foreground-muted">
+              {yeniGirisimAcik ? "Kapat" : "Aç"}
+            </span>
+          </button>
+
+          {yeniGirisimAcik && (
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">Ad</label>
+                <input
+                  type="text"
+                  value={yeniGirisimForm.ad}
+                  onChange={(e) =>
+                    setYeniGirisimForm({ ...yeniGirisimForm, ad: e.target.value })
+                  }
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  Sektör
+                </label>
+                <input
+                  type="text"
+                  value={yeniGirisimForm.sektor}
+                  onChange={(e) =>
+                    setYeniGirisimForm({ ...yeniGirisimForm, sektor: e.target.value })
+                  }
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  Kuruluş Yılı
+                </label>
+                <input
+                  type="number"
+                  value={yeniGirisimForm.kurulus_yili}
+                  onChange={(e) =>
+                    setYeniGirisimForm({ ...yeniGirisimForm, kurulus_yili: e.target.value })
+                  }
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  Kısa Açıklama
+                </label>
+                <textarea
+                  value={yeniGirisimForm.kisa_aciklama}
+                  onChange={(e) =>
+                    setYeniGirisimForm({ ...yeniGirisimForm, kisa_aciklama: e.target.value })
+                  }
+                  rows={3}
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  Ekip Büyüklüğü
+                </label>
+                <input
+                  type="number"
+                  value={yeniGirisimForm.ekip_buyuklugu}
+                  onChange={(e) =>
+                    setYeniGirisimForm({ ...yeniGirisimForm, ekip_buyuklugu: e.target.value })
+                  }
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  Teknoloji (virgülle ayır)
+                </label>
+                <input
+                  type="text"
+                  value={yeniGirisimForm.teknoloji}
+                  onChange={(e) =>
+                    setYeniGirisimForm({ ...yeniGirisimForm, teknoloji: e.target.value })
+                  }
+                  placeholder="Örn: Python, React, IoT"
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              {yeniGirisimMesaj && (
+                <p className="rounded-lg bg-[var(--success-soft)] px-3 py-2 text-sm text-success">
+                  {yeniGirisimMesaj}
+                </p>
+              )}
+              {yeniGirisimHata && (
+                <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
+                  Hata: {yeniGirisimHata}
+                </p>
+              )}
+
+              <button
+                onClick={yeniGirisimEkle}
+                disabled={yeniGirisimKaydediliyor || !yeniGirisimForm.ad.trim()}
+                className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {yeniGirisimKaydediliyor ? "Ekleniyor..." : "Girişim Ekle"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!yukleniyor && rol === "program_yoneticisi" && girisimler.length > 0 && (
+        <div className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Program Notu Ekle</h2>
+            <p className="mt-1 text-sm text-foreground-muted">
+              Girişim: <span className="text-foreground">{seciliGirisim?.ad}</span>
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground-muted">
+              Program Seç
+            </label>
+            <select
+              value={notForm.programId}
+              onChange={(e) => setNotForm({ ...notForm, programId: e.target.value })}
+              className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+            >
+              <option value="">Seç...</option>
+              {programlar.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.ad}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground-muted">Dönem</label>
+            <input
+              type="text"
+              value={notForm.donem}
+              onChange={(e) => setNotForm({ ...notForm, donem: e.target.value })}
+              placeholder="Örn: 2024 Güz"
+              className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground-muted">Durum</label>
+            <input
+              type="text"
+              value={notForm.durum}
+              onChange={(e) => setNotForm({ ...notForm, durum: e.target.value })}
+              placeholder="Örn: devam_ediyor"
+              className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground-muted">
+              Önemli Adımlar
+            </label>
+            <textarea
+              value={notForm.onemliAdimlar}
+              onChange={(e) => setNotForm({ ...notForm, onemliAdimlar: e.target.value })}
+              rows={3}
+              className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+            />
+          </div>
+
+          {notMesaj && (
+            <p className="rounded-lg bg-[var(--success-soft)] px-3 py-2 text-sm text-success">
+              {notMesaj}
+            </p>
+          )}
+          {notHata && (
+            <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
+              Hata: {notHata}
+            </p>
+          )}
+
+          <button
+            onClick={notEkle}
+            disabled={notKaydediliyor || !notForm.programId}
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+          >
+            {notKaydediliyor ? "Kaydediliyor..." : "Not Ekle"}
+          </button>
+        </div>
+      )}
+
+      {!yukleniyor && rol === "startup" && girisimler.length > 0 && (
+        <div className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Belge Ekle</h2>
+            <p className="mt-1 text-sm text-foreground-muted">
+              Girişim: <span className="text-foreground">{seciliGirisim?.ad}</span>
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground-muted">
+              Dosya Adı
+            </label>
+            <input
+              type="text"
+              value={belgeForm.dosya}
+              onChange={(e) => setBelgeForm({ ...belgeForm, dosya: e.target.value })}
+              placeholder="Örn: sunum.pdf"
+              className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground-muted">Tür</label>
+            <input
+              type="text"
+              value={belgeForm.tur}
+              onChange={(e) => setBelgeForm({ ...belgeForm, tur: e.target.value })}
+              placeholder="Örn: Sunum"
+              className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+            />
+          </div>
+
+          {belgeMesaj && (
+            <p className="rounded-lg bg-[var(--success-soft)] px-3 py-2 text-sm text-success">
+              {belgeMesaj}
+            </p>
+          )}
+          {belgeHata && (
+            <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
+              Hata: {belgeHata}
+            </p>
+          )}
+
+          <button
+            onClick={belgeEkle}
+            disabled={belgeKaydediliyor || !belgeForm.dosya.trim()}
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+          >
+            {belgeKaydediliyor ? "Kaydediliyor..." : "Belge Ekle"}
           </button>
         </div>
       )}

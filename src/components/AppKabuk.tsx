@@ -4,14 +4,36 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useOturum } from "@/context/OturumContext";
+import { useRole } from "@/context/RoleContext";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
+import type { KullaniciRol } from "@/lib/types";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: {
+  href: string;
+  label: string;
+  icon: (props: { className?: string }) => React.JSX.Element;
+  roller?: KullaniciRol[];
+}[] = [
   { href: "/", label: "Ana Sayfa", icon: IconHome },
-  { href: "/portal", label: "Portal", icon: IconEdit },
-  { href: "/onay", label: "Onay Kuyruğu", icon: IconCheckSquare },
-  { href: "/sorgu", label: "AI Sorgu", icon: IconSparkle },
-  { href: "/rapor", label: "Yönetici Raporu", icon: IconBarChart },
+  {
+    href: "/portal",
+    label: "Portal",
+    icon: IconEdit,
+    roller: ["startup", "program_yoneticisi", "super_admin"],
+  },
+  { href: "/onay", label: "Onay Kuyruğu", icon: IconCheckSquare, roller: ["super_admin"] },
+  {
+    href: "/sorgu",
+    label: "AI Sorgu",
+    icon: IconSparkle,
+    roller: ["karar_verici", "super_admin"],
+  },
+  {
+    href: "/rapor",
+    label: "Yönetici Raporu",
+    icon: IconBarChart,
+    roller: ["karar_verici", "super_admin"],
+  },
 ];
 
 function IconHome({ className }: { className?: string }) {
@@ -57,6 +79,7 @@ function IconBarChart({ className }: { className?: string }) {
 
 export function AppKabuk({ children }: { children: React.ReactNode }) {
   const { oturum } = useOturum();
+  const { rol } = useRole();
   const pathname = usePathname();
   const router = useRouter();
   const girisSayfasindaMi = pathname === "/giris";
@@ -89,7 +112,7 @@ export function AppKabuk({ children }: { children: React.ReactNode }) {
         </Link>
 
         <nav className="flex-1 space-y-1 px-3">
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEMS.filter((item) => !item.roller || item.roller.includes(rol)).map((item) => {
             const aktif = pathname === item.href;
             const Icon = item.icon;
             return (
