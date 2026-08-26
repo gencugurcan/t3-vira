@@ -469,6 +469,7 @@ export default function AnaSayfa() {
                 href={`/girisim/${g.id}`}
                 variants={kartVariants}
                 initial="hidden"
+                animate="visible"
                 exit="exit"
                 whileHover={
                   azaltilmisHareket

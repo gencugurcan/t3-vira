@@ -100,6 +100,7 @@ export default function SorguSayfasi() {
               key={s.goster}
               variants={oge}
               initial="hidden"
+              animate="visible"
               onClick={() => setSoru(s.gonder)}
               className="rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-xs text-foreground-muted transition hover:bg-surface-2 hover:text-foreground"
             >

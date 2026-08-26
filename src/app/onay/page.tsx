@@ -206,6 +206,7 @@ export default function OnaySayfasi() {
               key={g.id}
               variants={oge}
               initial="hidden"
+              animate="visible"
               exit="exit"
               className="rounded-2xl border border-border-subtle bg-surface p-4 shadow-sm"
             >
