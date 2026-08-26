@@ -4,7 +4,8 @@ export type KullaniciRol =
   | "super_admin"
   | "program_yoneticisi"
   | "startup"
-  | "karar_verici";
+  | "karar_verici"
+  | "basvuran";
 
 export interface GirisimBekleyenVeri {
   ad?: string;

@@ -8,6 +8,7 @@ const ROLES: { value: KullaniciRol; label: string }[] = [
   { value: "program_yoneticisi", label: "Program Yöneticisi" },
   { value: "startup", label: "Startup" },
   { value: "karar_verici", label: "Karar Verici" },
+  { value: "basvuran", label: "Başvuran" },
 ];
 
 const STORAGE_KEY = "t3-vira-rol";
