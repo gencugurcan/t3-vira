@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useOturum } from "@/context/OturumContext";
 import { useRole } from "@/context/RoleContext";
 import { useTema } from "@/context/TemaContext";
@@ -335,11 +335,6 @@ export function AppKabuk({ children }: { children: React.ReactNode }) {
       y: 0,
       transition: { duration: azaltilmisHareket ? 0 : 0.3 },
     },
-    exit: {
-      opacity: azaltilmisHareket ? 1 : 0,
-      x: azaltilmisHareket ? 0 : -8,
-      transition: { duration: azaltilmisHareket ? 0 : 0.2 },
-    },
   };
 
   const altBilgiVariants = {
@@ -397,35 +392,33 @@ export function AppKabuk({ children }: { children: React.ReactNode }) {
             animate="visible"
             className="flex-1 space-y-1 px-3"
           >
-            <AnimatePresence>
-              {gorunurOgeler.map((item) => {
-                const aktif = pathname === item.href;
-                const Icon = item.icon;
-                return (
-                  <MotionLink
-                    key={item.href}
-                    href={item.href}
-                    variants={navOgesiVariants}
-                    initial="hidden"
-                    exit="exit"
-                    className={`relative flex items-center gap-3 rounded-xl py-2.5 pl-3 pr-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                      aktif
-                        ? "bg-accent-soft text-foreground"
-                        : "text-foreground-muted hover:bg-surface-2 hover:text-foreground"
-                    }`}
-                  >
-                    {aktif && (
-                      <span
-                        aria-hidden="true"
-                        className="absolute inset-y-1 left-0 w-1 rounded-r-full bg-accent"
-                      />
-                    )}
-                    <Icon className={`h-[18px] w-[18px] shrink-0 ${aktif ? "text-accent" : ""}`} />
-                    <span className="leading-none">{t.nav[item.labelKey]}</span>
-                  </MotionLink>
-                );
-              })}
-            </AnimatePresence>
+            {gorunurOgeler.map((item) => {
+              const aktif = pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <MotionLink
+                  key={item.href}
+                  href={item.href}
+                  variants={navOgesiVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className={`relative flex items-center gap-3 rounded-xl py-2.5 pl-3 pr-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                    aktif
+                      ? "bg-accent-soft text-foreground"
+                      : "text-foreground-muted hover:bg-surface-2 hover:text-foreground"
+                  }`}
+                >
+                  {aktif && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-y-1 left-0 w-1 rounded-r-full bg-accent"
+                    />
+                  )}
+                  <Icon className={`h-[18px] w-[18px] shrink-0 ${aktif ? "text-accent" : ""}`} />
+                  <span className="leading-none">{t.nav[item.labelKey]}</span>
+                </MotionLink>
+              );
+            })}
           </motion.nav>
 
           <motion.div
