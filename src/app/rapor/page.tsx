@@ -7,48 +7,6 @@ import { supabase } from "@/lib/supabase";
 import { useCeviri } from "@/lib/ceviriler";
 import type { SabitliSorgu } from "@/lib/types";
 
-function RaporGoster({ metin }: { metin: string }) {
-  const satirlar = metin.split("\n");
-
-  return (
-    <div className="space-y-2">
-      {satirlar.map((satir, i) => {
-        const temiz = satir.trim();
-
-        if (temiz.startsWith("### ")) {
-          return (
-            <h3 key={i} className="mt-4 text-base font-semibold text-foreground">
-              {temiz.slice(4)}
-            </h3>
-          );
-        }
-        if (temiz.startsWith("## ") || /^\d+\.\s/.test(temiz)) {
-          return (
-            <h2 key={i} className="mt-5 text-lg font-bold text-foreground">
-              {temiz.replace(/^##\s/, "").replace(/^\d+\.\s/, "")}
-            </h2>
-          );
-        }
-        if (temiz.startsWith("- ") || temiz.startsWith("* ")) {
-          return (
-            <li key={i} className="ml-4 list-disc text-sm text-foreground-muted">
-              {temiz.slice(2).replace(/\*\*/g, "")}
-            </li>
-          );
-        }
-        if (temiz === "") {
-          return <div key={i} className="h-1" />;
-        }
-        return (
-          <p key={i} className="text-sm text-foreground-muted">
-            {temiz.replace(/\*\*/g, "")}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
-
 // Sabitlenmiş bir sorunun kartı: kendi sorusunu AI Sorgu'nun kullandığı
 // AYNI /api/sorgu endpoint'iyle her açılışta yeniden sorgular (cevap
 // sabitli_sorgular'da SAKLANMAZ, sadece soru metni saklanır).
@@ -264,7 +222,7 @@ export default function RaporSayfasi() {
 
         {rapor && (
           <div className="mt-6 rounded-lg bg-background px-4 py-4">
-            <RaporGoster metin={rapor} />
+            <AIYanit metin={rapor} />
           </div>
         )}
       </div>
