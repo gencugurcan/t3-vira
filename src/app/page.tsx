@@ -6,6 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { AiDurumRozeti, DurumRozeti } from "@/components/Rozet";
 import { useCeviri } from "@/lib/ceviriler";
+import { useOturum } from "@/context/OturumContext";
 import type { Girisim, GirisimDurum, Program } from "@/lib/types";
 
 const MotionLink = motion.create(Link);
@@ -57,6 +58,7 @@ function IconX({ className }: { className?: string }) {
 
 export default function AnaSayfa() {
   const t = useCeviri();
+  const { oturum } = useOturum();
   const azaltilmisHareket = useReducedMotion();
 
   const baslikVariants = {
@@ -243,7 +245,14 @@ export default function AnaSayfa() {
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-accent-2/10 blur-3xl" />
         <div className="relative">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          {oturum.ad && (
+            // GitHub tarzı kişisel karşılama - sadece dil/tema gibi tercih
+            // metinleri degil, oturumdaki gercek kullanici adiyla.
+            <p className="text-sm font-medium text-accent">
+              {t.anaSayfa.tekrarHosGeldin}, {oturum.ad}
+            </p>
+          )}
+          <h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground">
             {t.anaSayfa.baslik}
           </h1>
           <p className="mt-2 max-w-xl text-sm text-foreground-muted">
