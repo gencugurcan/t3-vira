@@ -1,23 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { AiDegerlendirme } from "@/components/AiDegerlendirme";
-import { DurumRozeti } from "@/components/Rozet";
-import type {
-  Dokuman,
-  Girisim,
-  GirisimProgramGecmisi,
-  SatisYatirimKaydi,
-} from "@/lib/types";
-
-function paraFormatla(deger: number | null) {
-  if (deger === null || deger === undefined) return "-";
-  return new Intl.NumberFormat("tr-TR", {
-    style: "currency",
-    currency: "TRY",
-    maximumFractionDigits: 0,
-  }).format(deger);
-}
+import { GirisimDetayIcerik } from "@/components/GirisimDetayIcerik";
+import type { Dokuman, Girisim, GirisimProgramGecmisi, SatisYatirimKaydi } from "@/lib/types";
 
 // "donem" serbest metin (örn. "2024 Güz") olarak tutuluyor, ayrı bir tarih/sıra
 // kolonu yok. Program geçmişini kronolojik göstermek için yıl + mevsimden
@@ -40,6 +24,9 @@ function donemSiraDegeri(donem: string | null): number {
   return yil * 4 + (mevsim ? MEVSIM_SIRA[mevsim] : 0);
 }
 
+// Veri çekme (Supabase, sunucuda) burada kalıyor; sunum + dil çevirisi
+// GirisimDetayIcerik.tsx'e devrediliyor (useCeviri() bir hook olduğu için
+// sunucu bileşeninde çağrılamaz — bkz. o dosyadaki not).
 export default async function GirisimDetaySayfasi(
   props: PageProps<"/girisim/[id]">,
 ) {
@@ -75,157 +62,11 @@ export default async function GirisimDetaySayfasi(
   const dokumanlar = (dokumanRes.data ?? []) as Dokuman[];
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <Link href="/" className="text-sm text-accent hover:underline">
-        ← Girişimlere dön
-      </Link>
-
-      {/* Genel bilgi */}
-      <div className="mt-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{girisim.ad}</h1>
-            <p className="mt-1 text-sm text-foreground-muted">
-              {girisim.sektor ?? "Sektör belirtilmemiş"}
-              {girisim.kurulus_yili ? ` · Kuruluş: ${girisim.kurulus_yili}` : ""}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <DurumRozeti durum={girisim.durum} />
-          </div>
-        </div>
-
-        {girisim.kisa_aciklama && (
-          <p className="mt-4 text-sm text-foreground-muted">{girisim.kisa_aciklama}</p>
-        )}
-
-        <AiDegerlendirme
-          girisimId={girisim.id}
-          initialAiDurum={girisim.ai_durum}
-          initialAiGerekce={girisim.ai_gerekce}
-        />
-
-        <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div>
-            <dt className="text-xs text-foreground-muted">Ekip Büyüklüğü</dt>
-            <dd className="text-sm font-medium text-foreground">
-              {girisim.ekip_buyuklugu ?? "-"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-foreground-muted">Son Güncelleme</dt>
-            <dd className="text-sm font-medium text-foreground">
-              {girisim.son_guncelleme ?? "-"}
-            </dd>
-          </div>
-        </dl>
-
-        {girisim.teknoloji && girisim.teknoloji.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-xs font-semibold uppercase text-foreground-muted">
-              Teknoloji
-            </h3>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {girisim.teknoloji.map((t) => (
-                <span
-                  key={t}
-                  className="rounded-lg bg-surface-2 px-2 py-1 text-xs text-foreground-muted"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Program geçmişi - timeline */}
-      <div className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground">Program Geçmişi</h2>
-        {programGecmisi.length === 0 ? (
-          <p className="mt-2 text-sm text-foreground-muted">Kayıt yok.</p>
-        ) : (
-          <ol className="mt-4 space-y-4 border-l border-border-subtle pl-4">
-            {programGecmisi.map((kayit) => (
-              <li key={kayit.id} className="relative">
-                <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-accent" />
-                <p className="text-sm font-medium text-foreground">
-                  {kayit.program?.ad ?? "Program"}{" "}
-                  {kayit.donem && (
-                    <span className="font-normal text-foreground-muted">
-                      · {kayit.donem}
-                    </span>
-                  )}
-                </p>
-                {kayit.durum && (
-                  <p className="text-xs text-foreground-muted">Durum: {kayit.durum}</p>
-                )}
-                {kayit.onemli_adimlar && (
-                  <p className="mt-1 text-sm text-foreground-muted">
-                    {kayit.onemli_adimlar}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ol>
-        )}
-      </div>
-
-      {/* Satış / yatırım kayıtları */}
-      <div className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground">
-          Satış / Yatırım Kayıtları
-        </h2>
-        {satisKayitlari.length === 0 ? (
-          <p className="mt-2 text-sm text-foreground-muted">Kayıt yok.</p>
-        ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-border-subtle text-xs uppercase text-foreground-muted">
-                  <th className="py-2 pr-4">Tarih</th>
-                  <th className="py-2 pr-4">Ciro</th>
-                  <th className="py-2 pr-4">İhracat</th>
-                  <th className="py-2 pr-4">Yatırım Türü</th>
-                  <th className="py-2 pr-4">Tutar</th>
-                  <th className="py-2 pr-4">Hibe/Ödül</th>
-                </tr>
-              </thead>
-              <tbody>
-                {satisKayitlari.map((k) => (
-                  <tr key={k.id} className="border-b border-border-subtle">
-                    <td className="py-2 pr-4">{k.tarih ?? "-"}</td>
-                    <td className="py-2 pr-4">{paraFormatla(k.ciro)}</td>
-                    <td className="py-2 pr-4">{paraFormatla(k.ihracat)}</td>
-                    <td className="py-2 pr-4">{k.yatirim_turu ?? "-"}</td>
-                    <td className="py-2 pr-4">{paraFormatla(k.tutar)}</td>
-                    <td className="py-2 pr-4">{k.hibe_odul ?? "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* Dokümanlar */}
-      <div className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground">Dokümanlar</h2>
-        {dokumanlar.length === 0 ? (
-          <p className="mt-2 text-sm text-foreground-muted">Kayıt yok.</p>
-        ) : (
-          <ul className="mt-4 divide-y divide-border-subtle">
-            {dokumanlar.map((d) => (
-              <li key={d.id} className="flex items-center justify-between py-2 text-sm">
-                <span className="text-foreground">{d.dosya ?? "İsimsiz dosya"}</span>
-                <span className="text-foreground-muted">
-                  {d.tur ?? "-"} · {d.yukleme_tarihi ?? "-"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+    <GirisimDetayIcerik
+      girisim={girisim}
+      programGecmisi={programGecmisi}
+      satisKayitlari={satisKayitlari}
+      dokumanlar={dokumanlar}
+    />
   );
 }

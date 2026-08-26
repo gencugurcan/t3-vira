@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { AiDurumRozeti, DurumRozeti, GIRISIM_DURUM_BILGISI } from "@/components/Rozet";
+import { AiDurumRozeti, DurumRozeti } from "@/components/Rozet";
+import { useCeviri } from "@/lib/ceviriler";
 import type { Girisim, GirisimDurum, Program } from "@/lib/types";
 
 const MotionLink = motion.create(Link);
@@ -55,6 +56,7 @@ function IconX({ className }: { className?: string }) {
 }
 
 export default function AnaSayfa() {
+  const t = useCeviri();
   const azaltilmisHareket = useReducedMotion();
 
   const baslikVariants = {
@@ -195,28 +197,30 @@ export default function AnaSayfa() {
   if (arama.trim()) {
     aktifFiltreler.push({
       anahtar: "arama",
-      etiket: `Arama: "${arama.trim()}"`,
+      etiket: `${t.anaSayfa.aramaEtiketi}: "${arama.trim()}"`,
       kaldir: () => setArama(""),
     });
   }
   if (sektorFiltre) {
     aktifFiltreler.push({
       anahtar: "sektor",
-      etiket: `Sektör: ${sektorFiltre}`,
+      etiket: `${t.anaSayfa.sektorEtiketi}: ${sektorFiltre}`,
       kaldir: () => setSektorFiltre(""),
     });
   }
   if (programFiltre) {
     aktifFiltreler.push({
       anahtar: "program",
-      etiket: `Program: ${programAdi(programFiltre)}`,
+      etiket: `${t.anaSayfa.programEtiketi}: ${programAdi(programFiltre)}`,
       kaldir: () => setProgramFiltre(""),
     });
   }
   if (durumFiltre) {
     aktifFiltreler.push({
       anahtar: "durum",
-      etiket: `Durum: ${GIRISIM_DURUM_BILGISI[durumFiltre].etiket}`,
+      etiket: `${t.anaSayfa.durumEtiketi}: ${
+        durumFiltre === "onayli" ? t.durum.onayli : t.durum.onayBekliyor
+      }`,
       kaldir: () => setDurumFiltre(""),
     });
   }
@@ -240,10 +244,10 @@ export default function AnaSayfa() {
         <div className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-accent-2/10 blur-3xl" />
         <div className="relative">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Girişimler
+            {t.anaSayfa.baslik}
           </h1>
           <p className="mt-2 max-w-xl text-sm text-foreground-muted">
-            Ekosistemdeki tüm girişimleri görüntüle ve filtrele.
+            {t.anaSayfa.altBaslik}
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -257,7 +261,7 @@ export default function AnaSayfa() {
               }`}
             >
               <p className="text-2xl font-semibold text-foreground">{toplamGirisim}</p>
-              <p className="text-xs text-foreground-muted">Toplam Girişim</p>
+              <p className="text-xs text-foreground-muted">{t.anaSayfa.toplamGirisim}</p>
             </button>
             <button
               type="button"
@@ -269,7 +273,7 @@ export default function AnaSayfa() {
               }`}
             >
               <p className="text-2xl font-semibold text-success">{onayliSayisi}</p>
-              <p className="text-xs text-foreground-muted">Onaylı</p>
+              <p className="text-xs text-foreground-muted">{t.durum.onayli}</p>
             </button>
             <button
               type="button"
@@ -281,7 +285,7 @@ export default function AnaSayfa() {
               }`}
             >
               <p className="text-2xl font-semibold text-warning">{bekleyenSayisi}</p>
-              <p className="text-xs text-foreground-muted">Onay Bekliyor</p>
+              <p className="text-xs text-foreground-muted">{t.durum.onayBekliyor}</p>
             </button>
           </div>
         </div>
@@ -295,7 +299,7 @@ export default function AnaSayfa() {
               type="text"
               value={arama}
               onChange={(e) => setArama(e.target.value)}
-              placeholder="Girişim adı veya açıklamada ara..."
+              placeholder={t.anaSayfa.aramaYerTutucu}
               className="w-full rounded-xl border border-border-subtle bg-surface py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
@@ -311,7 +315,7 @@ export default function AnaSayfa() {
                   : "border-border-subtle bg-surface text-foreground"
               }`}
             >
-              <option value="">Tüm sektörler</option>
+              <option value="">{t.anaSayfa.tumSektorler}</option>
               {sektorler.map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -331,7 +335,7 @@ export default function AnaSayfa() {
                   : "border-border-subtle bg-surface text-foreground"
               }`}
             >
-              <option value="">Tüm programlar</option>
+              <option value="">{t.anaSayfa.tumProgramlar}</option>
               {programlar.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.ad}
@@ -345,18 +349,20 @@ export default function AnaSayfa() {
               value={siralamaAlani}
               onChange={(e) => setSiralamaAlani(e.target.value as SiralamaAlani)}
               className="appearance-none bg-surface py-2 pl-3 pr-7 text-sm text-foreground focus:outline-none"
-              aria-label="Sıralama alanı"
+              aria-label={t.anaSayfa.siralamaAlaniEtiketi}
             >
-              <option value="ad">Ada göre</option>
-              <option value="yil">Yıla göre</option>
+              <option value="ad">{t.anaSayfa.adaGore}</option>
+              <option value="yil">{t.anaSayfa.yilaGore}</option>
             </select>
             <button
               type="button"
               onClick={() =>
                 setSiralamaYonu((y) => (y === "artan" ? "azalan" : "artan"))
               }
-              title={siralamaYonu === "artan" ? "Artan sıralama" : "Azalan sıralama"}
-              aria-label={siralamaYonu === "artan" ? "Artan sıralama" : "Azalan sıralama"}
+              title={siralamaYonu === "artan" ? t.anaSayfa.artanSiralama : t.anaSayfa.azalanSiralama}
+              aria-label={
+                siralamaYonu === "artan" ? t.anaSayfa.artanSiralama : t.anaSayfa.azalanSiralama
+              }
               className="flex items-center justify-center border-l border-border-subtle px-2.5 text-foreground-muted transition hover:bg-surface-2 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <IconArrowDown
@@ -384,19 +390,20 @@ export default function AnaSayfa() {
               onClick={tumunuTemizle}
               className="text-xs font-medium text-accent hover:underline"
             >
-              Tümünü temizle
+              {t.anaSayfa.tumunuTemizle}
             </button>
           </div>
         )}
       </motion.div>
 
       {yukleniyor && (
-        <p className="mt-6 text-sm text-foreground-muted">Yükleniyor...</p>
+        <p className="mt-6 text-sm text-foreground-muted">{t.anaSayfa.yukleniyor}</p>
       )}
 
       {hata && (
         <p className="mt-6 text-sm text-danger">
-          Veri alınamadı: {hata}
+          {t.anaSayfa.veriAlinamadi}
+          {hata}
         </p>
       )}
 
@@ -406,7 +413,7 @@ export default function AnaSayfa() {
             <IconSearch className="h-5 w-5" />
           </span>
           <p className="text-sm font-medium text-foreground">
-            Bu filtreye uygun girişim bulunamadı.
+            {t.anaSayfa.bosDurum}
           </p>
           {aktifFiltreler.length > 0 && (
             <button
@@ -414,7 +421,7 @@ export default function AnaSayfa() {
               onClick={tumunuTemizle}
               className="text-sm font-medium text-accent hover:underline"
             >
-              Filtreleri temizle
+              {t.anaSayfa.filtreleriTemizle}
             </button>
           )}
         </div>
@@ -481,7 +488,7 @@ export default function AnaSayfa() {
                 </div>
 
                 <p className="mt-1.5 text-sm text-foreground-muted">
-                  {g.sektor ?? "Sektör belirtilmemiş"}
+                  {g.sektor ?? t.anaSayfa.sektorBelirtilmemis}
                   {g.kurulus_yili ? ` · ${g.kurulus_yili}` : ""}
                 </p>
 

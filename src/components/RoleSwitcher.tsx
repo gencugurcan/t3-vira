@@ -3,13 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useRole } from "@/context/RoleContext";
 import { useOturum } from "@/context/OturumContext";
+import { useCeviri } from "@/lib/ceviriler";
 
 export function RoleSwitcher() {
-  const { rol, roller } = useRole();
+  const t = useCeviri();
+  const { rol } = useRole();
   const { oturum, cikisYap } = useOturum();
   const router = useRouter();
 
-  const rolEtiketi = roller.find((r) => r.value === rol)?.label ?? rol;
+  const rolEtiketi = t.ortak.roller[rol] ?? rol;
 
   function cikisYapiliyor() {
     cikisYap();
@@ -26,7 +28,7 @@ export function RoleSwitcher() {
         onClick={cikisYapiliyor}
         className="w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-1.5 text-left text-foreground-muted transition hover:text-foreground"
       >
-        Çıkış Yap
+        {t.ortak.cikisYap}
       </button>
     </div>
   );

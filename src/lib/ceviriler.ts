@@ -1,0 +1,347 @@
+"use client";
+
+import { useMemo } from "react";
+import { useDil } from "@/context/DilContext";
+
+// Merkezi çeviri sözlüğü — sayfa/bölüm bazlı, nested obje. Yeni bir metin
+// eklerken SADECE burayı güncelle; sayfalar useCeviri() üzerinden tüketir.
+export const ceviriler = {
+  tr: {
+    nav: {
+      anaSayfa: "Ana Sayfa",
+      portal: "Portal",
+      onayKuyrugu: "Onay Kuyruğu",
+      aiSorgu: "AI Sorgu",
+      yoneticiRaporu: "Yönetici Raporu",
+      karsilastir: "Karşılaştır",
+    },
+    ayarlar: {
+      baslik: "Ayarlar",
+      tema: "Tema",
+      temaAcikGec: "Aydınlık temaya geç",
+      temaKoyuGec: "Koyu temaya geç",
+      dil: "Dil",
+      sidebarAc: "Kenar çubuğunu aç",
+      sidebarKapat: "Kenar çubuğunu kapat",
+    },
+    durum: {
+      onayli: "Onaylı",
+      onayBekliyor: "Onay Bekliyor",
+    },
+    aiDurum: {
+      hazir: "Hazır",
+      izlemede: "İzlemede",
+      veriEksik: "Veri Eksik",
+    },
+    anaSayfa: {
+      baslik: "Girişimler",
+      altBaslik: "Ekosistemdeki tüm girişimleri görüntüle ve filtrele.",
+      toplamGirisim: "Toplam Girişim",
+      aramaYerTutucu: "Girişim adı veya açıklamada ara...",
+      tumSektorler: "Tüm sektörler",
+      tumProgramlar: "Tüm programlar",
+      adaGore: "Ada göre",
+      yilaGore: "Yıla göre",
+      yukleniyor: "Yükleniyor...",
+      veriAlinamadi: "Veri alınamadı: ",
+      bosDurum: "Bu filtreye uygun girişim bulunamadı.",
+      filtreleriTemizle: "Filtreleri temizle",
+      tumunuTemizle: "Tümünü temizle",
+      aramaEtiketi: "Arama",
+      sektorEtiketi: "Sektör",
+      programEtiketi: "Program",
+      durumEtiketi: "Durum",
+      sektorBelirtilmemis: "Sektör belirtilmemiş",
+      artanSiralama: "Artan sıralama",
+      azalanSiralama: "Azalan sıralama",
+      siralamaAlaniEtiketi: "Sıralama alanı",
+    },
+    girisimDetay: {
+      geriDon: "← Girişimlere dön",
+      ekipBuyuklugu: "Ekip Büyüklüğü",
+      sonGuncelleme: "Son Güncelleme",
+      teknoloji: "Teknoloji",
+      programGecmisi: "Program Geçmişi",
+      program: "Program",
+      kayitYok: "Kayıt yok.",
+      durumEtiketi: "Durum",
+      satisYatirimKayitlari: "Satış / Yatırım Kayıtları",
+      tarih: "Tarih",
+      ciro: "Ciro",
+      ihracat: "İhracat",
+      yatirimTuru: "Yatırım Türü",
+      tutar: "Tutar",
+      hibeOdul: "Hibe/Ödül",
+      dokumanlar: "Dokümanlar",
+      isimsizDosya: "İsimsiz dosya",
+      sektorBelirtilmemis: "Sektör belirtilmemiş",
+      kurulus: "Kuruluş",
+      aiDegerlendirmesiYap: "AI Değerlendirmesi Yap",
+      degerlendiriliyor: "Değerlendiriliyor...",
+      aiGerekcesi: "AI gerekçesi",
+      hata: "Hata",
+      degerlendirmeBasarisiz: "Değerlendirme başarısız",
+    },
+    ortak: {
+      hata: "Hata",
+      bilinmeyenHata: "Bilinmeyen hata",
+      yukleniyor: "Yükleniyor...",
+      analizEdiliyor: "Analiz ediliyor...",
+      sadeceKararVericiSuperAdmin: "Bu sayfa sadece Karar Verici ve Süper Admin rolleri içindir.",
+      sadeceSuperAdmin: "Bu sayfa sadece Süper Admin rolü içindir.",
+      cikisYap: "Çıkış Yap",
+      roller: {
+        super_admin: "Süper Admin",
+        program_yoneticisi: "Program Yöneticisi",
+        startup: "Startup",
+        karar_verici: "Karar Verici",
+      },
+    },
+    karsilastir: {
+      baslik: "Karşılaştır",
+      aciklama: "İki girişimi seçip AI destekli, gerekçeli bir karşılaştırma alın.",
+      girisim1: "1. Girişim",
+      girisim2: "2. Girişim",
+      secin: "Seçin...",
+      karsilastirButonu: "Karşılaştır",
+      karsilastiriliyor: "Karşılaştırılıyor...",
+      karsilastirmaBasarisiz: "Karşılaştırma başarısız",
+      programlar: "Program(lar)",
+      toplamCiro: "Toplam Ciro",
+      sonGuncelleme: "Son Güncelleme",
+      aiDegerlendirmesi: "AI Değerlendirmesi",
+      sektorBelirtilmemis: "Sektör belirtilmemiş",
+    },
+    sorgu: {
+      baslik: "AI Sorgu",
+      aciklama: "Ekosistemdeki tüm girişim verisine dayanarak serbest metinle soru sor.",
+      yerTutucu: "Örn: Kuluçka programında son 3 aydır güncellenmeyen kaç girişim var?",
+      gonder: "Gönder",
+      soruBasarisiz: "Sorgu başarısız",
+      panoyaEklendi: "Panoya eklendi",
+      panoyaSabitle: "Panoya sabitle",
+      panoyaSabitlenemedi: "Panoya sabitlenemedi",
+    },
+    rapor: {
+      baslik: "Yönetici Raporu",
+      aciklama: "Ekosistemin güncel durumunu özetleyen AI destekli rapor.",
+      raporOlusturButonu: "Rapor Oluştur",
+      raporHazirlaniyor: "Rapor hazırlanıyor...",
+      raporOlusturulamadi: "Rapor oluşturulamadı",
+      sabitlenmisSorularBaslik: "Sabitlenmiş Sorular",
+      sabitlenmisSorularAciklama:
+        "AI Sorgu ekranından panoya sabitlenen sorular; her açılışta güncel cevapla yeniden sorgulanır.",
+      sabitliSorularAlinamadi: "Sabitlenmiş sorular alınamadı",
+      bosDurum:
+        "Henüz sabitlenmiş bir soru yok — AI Sorgu ekranından bir cevabı panoya sabitleyebilirsiniz.",
+      yenile: "Yenile",
+      kaldir: "Kaldır",
+      kaldirilamadi: "Kaldırılamadı",
+    },
+    onay: {
+      baslik: "Admin Onay Kuyruğu",
+      aciklama: "Onay bekleyen girişim güncellemeleri.",
+      bosDurum: "Onay bekleyen girişim yok.",
+      aiOnayOzeti: "AI Onay Özeti",
+      onayla: "Onayla",
+      reddet: "Reddet",
+      onerilenDegisiklikler: "Startup'ın önerdiği değişiklikler",
+      ozetAlinamadi: "Özet alınamadı",
+      sektorBelirtilmemis: "Sektör belirtilmemiş",
+      guncelleme: "Güncelleme",
+      bos: "(boş)",
+      ad: "Ad",
+      sektor: "Sektör",
+      kisaAciklama: "Kısa Açıklama",
+      ekipBuyuklugu: "Ekip Büyüklüğü",
+      teknoloji: "Teknoloji",
+    },
+  },
+  en: {
+    nav: {
+      anaSayfa: "Home",
+      portal: "Portal",
+      onayKuyrugu: "Approval Queue",
+      aiSorgu: "AI Query",
+      yoneticiRaporu: "Executive Report",
+      karsilastir: "Compare",
+    },
+    ayarlar: {
+      baslik: "Settings",
+      tema: "Theme",
+      temaAcikGec: "Switch to light theme",
+      temaKoyuGec: "Switch to dark theme",
+      dil: "Language",
+      sidebarAc: "Open sidebar",
+      sidebarKapat: "Close sidebar",
+    },
+    durum: {
+      onayli: "Approved",
+      onayBekliyor: "Pending Approval",
+    },
+    aiDurum: {
+      hazir: "Ready",
+      izlemede: "Monitoring",
+      veriEksik: "Data Missing",
+    },
+    anaSayfa: {
+      baslik: "Ventures",
+      altBaslik: "View and filter all ventures in the ecosystem.",
+      toplamGirisim: "Total Ventures",
+      aramaYerTutucu: "Search by venture name or description...",
+      tumSektorler: "All sectors",
+      tumProgramlar: "All programs",
+      adaGore: "By name",
+      yilaGore: "By year",
+      yukleniyor: "Loading...",
+      veriAlinamadi: "Could not fetch data: ",
+      bosDurum: "No ventures match this filter.",
+      filtreleriTemizle: "Clear filters",
+      tumunuTemizle: "Clear all",
+      aramaEtiketi: "Search",
+      sektorEtiketi: "Sector",
+      programEtiketi: "Program",
+      durumEtiketi: "Status",
+      sektorBelirtilmemis: "Sector not specified",
+      artanSiralama: "Ascending order",
+      azalanSiralama: "Descending order",
+      siralamaAlaniEtiketi: "Sort field",
+    },
+    girisimDetay: {
+      geriDon: "← Back to ventures",
+      ekipBuyuklugu: "Team Size",
+      sonGuncelleme: "Last Updated",
+      teknoloji: "Technology",
+      programGecmisi: "Program History",
+      program: "Program",
+      kayitYok: "No records.",
+      durumEtiketi: "Status",
+      satisYatirimKayitlari: "Sales / Investment Records",
+      tarih: "Date",
+      ciro: "Revenue",
+      ihracat: "Export",
+      yatirimTuru: "Investment Type",
+      tutar: "Amount",
+      hibeOdul: "Grant/Award",
+      dokumanlar: "Documents",
+      isimsizDosya: "Unnamed file",
+      sektorBelirtilmemis: "Sector not specified",
+      kurulus: "Founded",
+      aiDegerlendirmesiYap: "Run AI Evaluation",
+      degerlendiriliyor: "Evaluating...",
+      aiGerekcesi: "AI rationale",
+      hata: "Error",
+      degerlendirmeBasarisiz: "Evaluation failed",
+    },
+    ortak: {
+      hata: "Error",
+      bilinmeyenHata: "Unknown error",
+      yukleniyor: "Loading...",
+      analizEdiliyor: "Analyzing...",
+      sadeceKararVericiSuperAdmin: "This page is only for the Decision Maker and Super Admin roles.",
+      sadeceSuperAdmin: "This page is only for the Super Admin role.",
+      cikisYap: "Log Out",
+      roller: {
+        super_admin: "Super Admin",
+        program_yoneticisi: "Program Manager",
+        startup: "Startup",
+        karar_verici: "Decision Maker",
+      },
+    },
+    karsilastir: {
+      baslik: "Compare",
+      aciklama: "Select two ventures to get an AI-powered, reasoned comparison.",
+      girisim1: "Venture 1",
+      girisim2: "Venture 2",
+      secin: "Select...",
+      karsilastirButonu: "Compare",
+      karsilastiriliyor: "Comparing...",
+      karsilastirmaBasarisiz: "Comparison failed",
+      programlar: "Program(s)",
+      toplamCiro: "Total Revenue",
+      sonGuncelleme: "Last Updated",
+      aiDegerlendirmesi: "AI Assessment",
+      sektorBelirtilmemis: "Sector not specified",
+    },
+    sorgu: {
+      baslik: "AI Query",
+      aciklama: "Ask a free-form question based on all venture data in the ecosystem.",
+      yerTutucu: "E.g.: How many ventures in the Incubation program haven't been updated in 3 months?",
+      gonder: "Send",
+      soruBasarisiz: "Query failed",
+      panoyaEklendi: "Added to board",
+      panoyaSabitle: "Pin to board",
+      panoyaSabitlenemedi: "Could not pin to board",
+    },
+    rapor: {
+      baslik: "Executive Report",
+      aciklama: "AI-powered report summarizing the current state of the ecosystem.",
+      raporOlusturButonu: "Generate Report",
+      raporHazirlaniyor: "Preparing report...",
+      raporOlusturulamadi: "Could not generate report",
+      sabitlenmisSorularBaslik: "Pinned Questions",
+      sabitlenmisSorularAciklama:
+        "Questions pinned from the AI Query screen; re-queried for a fresh answer every time this loads.",
+      sabitliSorularAlinamadi: "Could not fetch pinned questions",
+      bosDurum:
+        "No pinned questions yet — you can pin an answer from the AI Query screen.",
+      yenile: "Refresh",
+      kaldir: "Remove",
+      kaldirilamadi: "Could not remove",
+    },
+    onay: {
+      baslik: "Admin Approval Queue",
+      aciklama: "Venture updates awaiting approval.",
+      bosDurum: "No ventures awaiting approval.",
+      aiOnayOzeti: "AI Approval Summary",
+      onayla: "Approve",
+      reddet: "Reject",
+      onerilenDegisiklikler: "Changes proposed by the startup",
+      ozetAlinamadi: "Could not fetch summary",
+      sektorBelirtilmemis: "Sector not specified",
+      guncelleme: "Updated",
+      bos: "(empty)",
+      ad: "Name",
+      sektor: "Sector",
+      kisaAciklama: "Short Description",
+      ekipBuyuklugu: "Team Size",
+      teknoloji: "Technology",
+    },
+  },
+} as const;
+
+type CeviriSozlugu = typeof ceviriler.tr;
+
+// tr'de var olup hedef dilde eksik kalan bir anahtar varsa (ör. yeni bir
+// metin eklenip henüz çevrilmediyse) sessizce tr karşılığına döner —
+// asla boş/undefined göstermez. "as const" ile tr/en yaprak string'leri
+// farklı literal tiplere sahip olduğundan (ör. "Ana Sayfa" vs "Home"),
+// birleştirme fonksiyonu bilerek gevşek (Record<string, unknown>) tipli;
+// sonuç sadece dışarıda, tek noktada CeviriSozlugu'na cast ediliyor.
+function derinBirlestir(
+  taban: Record<string, unknown>,
+  hedef: Record<string, unknown>,
+): Record<string, unknown> {
+  const sonuc: Record<string, unknown> = { ...taban };
+  for (const anahtar of Object.keys(taban)) {
+    const tabanDeger = taban[anahtar];
+    const hedefDeger = hedef[anahtar];
+    if (tabanDeger && typeof tabanDeger === "object" && !Array.isArray(tabanDeger)) {
+      sonuc[anahtar] = derinBirlestir(
+        tabanDeger as Record<string, unknown>,
+        (hedefDeger ?? {}) as Record<string, unknown>,
+      );
+    } else {
+      sonuc[anahtar] = hedefDeger ?? tabanDeger;
+    }
+  }
+  return sonuc;
+}
+
+export function useCeviri(): CeviriSozlugu {
+  const { dil } = useDil();
+  return useMemo(() => {
+    if (dil === "tr") return ceviriler.tr;
+    return derinBirlestir(ceviriler.tr, ceviriler.en) as CeviriSozlugu;
+  }, [dil]);
+}

@@ -4,7 +4,12 @@ import { useState } from "react";
 import { useRole } from "@/context/RoleContext";
 import { AIYanit } from "@/components/AIYanit";
 import { supabase } from "@/lib/supabase";
+import { useCeviri } from "@/lib/ceviriler";
 
+// Bilerek çevrilmiyor: bu metinler tıklanınca AYNEN /api/sorgu'ya gönderilen
+// gerçek sorgu içeriği oluyor (salt bir arayüz etiketi değil) — çevirmek,
+// AI'a giden içeriği (ve VERI_EKSIK gibi backend'in beklediği ham değerleri)
+// değiştirip fonksiyonel davranışı etkileyebilir.
 const ORNEK_SORULAR = [
   "Hangi girişimlerin AI durumu VERI_EKSIK?",
   "En yüksek cirolu 3 girişim hangileri?",
@@ -13,6 +18,7 @@ const ORNEK_SORULAR = [
 ];
 
 export default function SorguSayfasi() {
+  const t = useCeviri();
   const { rol } = useRole();
 
   const [soru, setSoru] = useState("");
@@ -28,7 +34,7 @@ export default function SorguSayfasi() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8">
         <p className="rounded-lg bg-[var(--warning-soft)] px-4 py-3 text-sm text-warning">
-          Bu sayfa sadece Karar Verici ve Süper Admin rolleri içindir.
+          {t.ortak.sadeceKararVericiSuperAdmin}
         </p>
       </div>
     );
@@ -50,11 +56,11 @@ export default function SorguSayfasi() {
       });
       const veri = await res.json();
       if (!res.ok) {
-        throw new Error(veri.error ?? "Sorgu başarısız");
+        throw new Error(veri.error ?? t.sorgu.soruBasarisiz);
       }
       setCevap(veri.cevap);
     } catch (e) {
-      setHata(e instanceof Error ? e.message : "Bilinmeyen hata");
+      setHata(e instanceof Error ? e.message : t.ortak.bilinmeyenHata);
     } finally {
       setYukleniyor(false);
     }
@@ -74,7 +80,7 @@ export default function SorguSayfasi() {
       if (error) throw new Error(error.message);
       setSabitlendi(true);
     } catch (e) {
-      setSabitlemeHatasi(e instanceof Error ? e.message : "Bilinmeyen hata");
+      setSabitlemeHatasi(e instanceof Error ? e.message : t.ortak.bilinmeyenHata);
     } finally {
       setSabitleniyor(false);
     }
@@ -82,9 +88,9 @@ export default function SorguSayfasi() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground">AI Sorgu</h1>
+      <h1 className="text-2xl font-bold text-foreground">{t.sorgu.baslik}</h1>
       <p className="mt-1 text-sm text-foreground-muted">
-        Ekosistemdeki tüm girişim verisine dayanarak serbest metinle soru sor.
+        {t.sorgu.aciklama}
       </p>
 
       <div className="mt-6 space-y-4">
@@ -111,7 +117,7 @@ export default function SorguSayfasi() {
         {yukleniyor && (
           <div className="flex items-center gap-2 text-sm text-foreground-muted">
             <span className="h-2 w-2 animate-pulse rounded-full bg-accent" />
-            Analiz ediliyor...
+            {t.ortak.analizEdiliyor}
           </div>
         )}
 
@@ -130,8 +136,8 @@ export default function SorguSayfasi() {
               <button
                 onClick={panoyaSabitle}
                 disabled={sabitleniyor || sabitlendi}
-                title={sabitlendi ? "Panoya eklendi" : "Panoya sabitle"}
-                aria-label={sabitlendi ? "Panoya eklendi" : "Panoya sabitle"}
+                title={sabitlendi ? t.sorgu.panoyaEklendi : t.sorgu.panoyaSabitle}
+                aria-label={sabitlendi ? t.sorgu.panoyaEklendi : t.sorgu.panoyaSabitle}
                 className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full transition disabled:cursor-default ${
                   sabitlendi
                     ? "text-success"
@@ -153,11 +159,11 @@ export default function SorguSayfasi() {
               <AIYanit metin={cevap} />
 
               {sabitlendi && (
-                <p className="mt-2 text-xs text-success">Panoya eklendi</p>
+                <p className="mt-2 text-xs text-success">{t.sorgu.panoyaEklendi}</p>
               )}
               {sabitlemeHatasi && (
                 <p className="mt-2 text-xs text-danger">
-                  Panoya sabitlenemedi: {sabitlemeHatasi}
+                  {t.sorgu.panoyaSabitlenemedi}: {sabitlemeHatasi}
                 </p>
               )}
             </div>
@@ -176,14 +182,14 @@ export default function SorguSayfasi() {
             }
           }}
           rows={1}
-          placeholder="Örn: Kuluçka programında son 3 aydır güncellenmeyen kaç girişim var?"
+          placeholder={t.sorgu.yerTutucu}
           className="max-h-32 flex-1 resize-none bg-transparent px-2 py-2 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none"
         />
         <button
           onClick={sor}
           disabled={yukleniyor || !soru.trim()}
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-accent text-white transition hover:opacity-90 disabled:opacity-40"
-          aria-label="Gönder"
+          aria-label={t.sorgu.gonder}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"></line>

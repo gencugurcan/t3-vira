@@ -3,19 +3,24 @@
 import { useEffect, useState } from "react";
 import { useRole } from "@/context/RoleContext";
 import { supabase } from "@/lib/supabase";
+import { useCeviri, ceviriler } from "@/lib/ceviriler";
 import type { Girisim, GirisimBekleyenVeri } from "@/lib/types";
 
-const ALAN_ETIKETLERI: Record<keyof GirisimBekleyenVeri, string> = {
-  ad: "Ad",
-  sektor: "Sektör",
-  kisa_aciklama: "Kısa Açıklama",
-  ekip_buyuklugu: "Ekip Büyüklüğü",
-  teknoloji: "Teknoloji",
-};
+type CeviriSozlugu = typeof ceviriler.tr;
 
-function alanGoster(deger: unknown): string {
-  if (deger === null || deger === undefined || deger === "") return "(boş)";
-  if (Array.isArray(deger)) return deger.length ? deger.join(", ") : "(boş)";
+function alanEtiketleri(t: CeviriSozlugu): Record<keyof GirisimBekleyenVeri, string> {
+  return {
+    ad: t.onay.ad,
+    sektor: t.onay.sektor,
+    kisa_aciklama: t.onay.kisaAciklama,
+    ekip_buyuklugu: t.onay.ekipBuyuklugu,
+    teknoloji: t.onay.teknoloji,
+  };
+}
+
+function alanGoster(deger: unknown, bosMetni: string): string {
+  if (deger === null || deger === undefined || deger === "") return bosMetni;
+  if (Array.isArray(deger)) return deger.length ? deger.join(", ") : bosMetni;
   return String(deger);
 }
 
@@ -28,22 +33,24 @@ interface AlanFarki {
 // Canlı (onaylı) alanlarla startup'ın gönderdiği taslağı karşılaştırıp
 // sadece gerçekten değişen alanları döndürür — admin ekranında "ne değişti"
 // sorusuna doğrudan cevap vermek için.
-function degisenAlanlar(g: Girisim): AlanFarki[] {
+function degisenAlanlar(g: Girisim, t: CeviriSozlugu): AlanFarki[] {
   const taslak = g.bekleyen_veri;
   if (!taslak) return [];
+  const etiketler = alanEtiketleri(t);
   const sonuc: AlanFarki[] = [];
-  (Object.keys(ALAN_ETIKETLERI) as (keyof GirisimBekleyenVeri)[]).forEach((anahtar) => {
+  (Object.keys(etiketler) as (keyof GirisimBekleyenVeri)[]).forEach((anahtar) => {
     if (!(anahtar in taslak)) return;
-    const eski = alanGoster(g[anahtar as keyof Girisim]);
-    const yeni = alanGoster(taslak[anahtar]);
+    const eski = alanGoster(g[anahtar as keyof Girisim], t.onay.bos);
+    const yeni = alanGoster(taslak[anahtar], t.onay.bos);
     if (eski !== yeni) {
-      sonuc.push({ alan: ALAN_ETIKETLERI[anahtar], eski, yeni });
+      sonuc.push({ alan: etiketler[anahtar], eski, yeni });
     }
   });
   return sonuc;
 }
 
 export default function OnaySayfasi() {
+  const t = useCeviri();
   const { rol } = useRole();
 
   const [girisimler, setGirisimler] = useState<Girisim[]>([]);
@@ -143,13 +150,13 @@ export default function OnaySayfasi() {
       });
       const veri = await res.json();
       if (!res.ok) {
-        throw new Error(veri.error ?? "Özet alınamadı");
+        throw new Error(veri.error ?? t.onay.ozetAlinamadi);
       }
       setOzetler((prev) => ({ ...prev, [id]: veri.ozet }));
     } catch (e) {
       setOzetHata((prev) => ({
         ...prev,
-        [id]: e instanceof Error ? e.message : "Bilinmeyen hata",
+        [id]: e instanceof Error ? e.message : t.ortak.bilinmeyenHata,
       }));
     } finally {
       setOzetYukleniyor((prev) => ({ ...prev, [id]: false }));
@@ -160,7 +167,7 @@ export default function OnaySayfasi() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8">
         <p className="rounded-lg bg-[var(--warning-soft)] px-4 py-3 text-sm text-warning">
-          Bu sayfa sadece Süper Admin rolü içindir.
+          {t.ortak.sadeceSuperAdmin}
         </p>
       </div>
     );
@@ -168,21 +175,21 @@ export default function OnaySayfasi() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground">Admin Onay Kuyruğu</h1>
+      <h1 className="text-2xl font-bold text-foreground">{t.onay.baslik}</h1>
       <p className="mt-1 text-sm text-foreground-muted">
-        Onay bekleyen girişim güncellemeleri.
+        {t.onay.aciklama}
       </p>
 
-      {yukleniyor && <p className="mt-6 text-sm text-foreground-muted">Yükleniyor...</p>}
+      {yukleniyor && <p className="mt-6 text-sm text-foreground-muted">{t.ortak.yukleniyor}</p>}
 
       {hata && (
         <p className="mt-6 rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
-          Hata: {hata}
+          {t.ortak.hata}: {hata}
         </p>
       )}
 
       {!yukleniyor && girisimler.length === 0 && !hata && (
-        <p className="mt-6 text-sm text-foreground-muted">Onay bekleyen girişim yok.</p>
+        <p className="mt-6 text-sm text-foreground-muted">{t.onay.bosDurum}</p>
       )}
 
       <div className="mt-6 space-y-3">
@@ -195,8 +202,8 @@ export default function OnaySayfasi() {
               <div>
                 <p className="font-semibold text-foreground">{g.ad}</p>
                 <p className="text-sm text-foreground-muted">
-                  {g.sektor ?? "Sektör belirtilmemiş"}
-                  {g.son_guncelleme ? ` · Güncelleme: ${g.son_guncelleme}` : ""}
+                  {g.sektor ?? t.onay.sektorBelirtilmemis}
+                  {g.son_guncelleme ? ` · ${t.onay.guncelleme}: ${g.son_guncelleme}` : ""}
                 </p>
                 {g.kisa_aciklama && (
                   <p className="mt-1 text-sm text-foreground-muted">{g.kisa_aciklama}</p>
@@ -208,32 +215,32 @@ export default function OnaySayfasi() {
                   disabled={ozetYukleniyor[g.id]}
                   className="rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
                 >
-                  {ozetYukleniyor[g.id] ? "Analiz ediliyor..." : "AI Onay Özeti"}
+                  {ozetYukleniyor[g.id] ? t.ortak.analizEdiliyor : t.onay.aiOnayOzeti}
                 </button>
                 <button
                   onClick={() => onayla(g)}
                   disabled={islemdeId === g.id}
                   className="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                 >
-                  Onayla
+                  {t.onay.onayla}
                 </button>
                 <button
                   onClick={() => reddet(g)}
                   disabled={islemdeId === g.id}
                   className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
                 >
-                  Reddet
+                  {t.onay.reddet}
                 </button>
               </div>
             </div>
 
-            {degisenAlanlar(g).length > 0 && (
+            {degisenAlanlar(g, t).length > 0 && (
               <div className="mt-3 rounded-lg border border-border-subtle bg-[var(--warning-soft)] px-3 py-2">
                 <p className="text-xs font-semibold uppercase text-warning">
-                  Startup&apos;ın önerdiği değişiklikler
+                  {t.onay.onerilenDegisiklikler}
                 </p>
                 <ul className="mt-1 space-y-1">
-                  {degisenAlanlar(g).map((fark) => (
+                  {degisenAlanlar(g, t).map((fark) => (
                     <li key={fark.alan} className="text-sm text-foreground">
                       <span className="font-medium">{fark.alan}:</span>{" "}
                       <span className="line-through opacity-60">{fark.eski}</span>{" "}
@@ -250,7 +257,9 @@ export default function OnaySayfasi() {
               </div>
             )}
             {ozetHata[g.id] && (
-              <p className="mt-2 text-xs text-danger">Hata: {ozetHata[g.id]}</p>
+              <p className="mt-2 text-xs text-danger">
+                {t.ortak.hata}: {ozetHata[g.id]}
+              </p>
             )}
           </div>
         ))}

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TemaProvider } from "@/context/TemaContext";
+import { DilProvider } from "@/context/DilContext";
+import { SidebarProvider } from "@/context/SidebarContext";
 import { RoleProvider } from "@/context/RoleContext";
 import { OturumProvider } from "@/context/OturumContext";
 import { AppKabuk } from "@/components/AppKabuk";
@@ -55,11 +57,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <TemaProvider>
-          <OturumProvider>
-            <RoleProvider>
-              <AppKabuk>{children}</AppKabuk>
-            </RoleProvider>
-          </OturumProvider>
+          <DilProvider>
+            <SidebarProvider>
+              <OturumProvider>
+                <RoleProvider>
+                  <AppKabuk>{children}</AppKabuk>
+                </RoleProvider>
+              </OturumProvider>
+            </SidebarProvider>
+          </DilProvider>
         </TemaProvider>
       </body>
     </html>

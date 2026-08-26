@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AiDurumRozeti } from "@/components/Rozet";
+import { useCeviri } from "@/lib/ceviriler";
 import type { AiDurum } from "@/lib/types";
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function AiDegerlendirme({ girisimId, initialAiDurum, initialAiGerekce }: Props) {
+  const t = useCeviri();
   const [aiDurum, setAiDurum] = useState<AiDurum>(initialAiDurum);
   const [aiGerekce, setAiGerekce] = useState<string | null>(initialAiGerekce);
   const [yukleniyor, setYukleniyor] = useState(false);
@@ -27,12 +29,12 @@ export function AiDegerlendirme({ girisimId, initialAiDurum, initialAiGerekce }:
       });
       const veri = await res.json();
       if (!res.ok) {
-        throw new Error(veri.error ?? "Değerlendirme başarısız");
+        throw new Error(veri.error ?? t.girisimDetay.degerlendirmeBasarisiz);
       }
       setAiDurum(veri.ai_durum);
       setAiGerekce(veri.ai_gerekce);
     } catch (e) {
-      setHata(e instanceof Error ? e.message : "Bilinmeyen hata");
+      setHata(e instanceof Error ? e.message : t.girisimDetay.degerlendirmeBasarisiz);
     } finally {
       setYukleniyor(false);
     }
@@ -47,15 +49,19 @@ export function AiDegerlendirme({ girisimId, initialAiDurum, initialAiGerekce }:
           disabled={yukleniyor}
           className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
         >
-          {yukleniyor ? "Değerlendiriliyor..." : "AI Değerlendirmesi Yap"}
+          {yukleniyor ? t.girisimDetay.degerlendiriliyor : t.girisimDetay.aiDegerlendirmesiYap}
         </button>
       </div>
 
       {aiGerekce && (
-        <p className="mt-2 text-xs text-foreground-muted">AI gerekçesi: {aiGerekce}</p>
+        <p className="mt-2 text-xs text-foreground-muted">
+          {t.girisimDetay.aiGerekcesi}: {aiGerekce}
+        </p>
       )}
       {hata && (
-        <p className="mt-2 text-xs text-danger">Hata: {hata}</p>
+        <p className="mt-2 text-xs text-danger">
+          {t.girisimDetay.hata}: {hata}
+        </p>
       )}
     </div>
   );

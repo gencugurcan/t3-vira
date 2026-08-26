@@ -1,3 +1,6 @@
+"use client";
+
+import { useCeviri } from "@/lib/ceviriler";
 import type { AiDurum, GirisimDurum } from "@/lib/types";
 
 // Tüm durum/AI rozetlerinin tek stil kaynağı. Yeni bir renk eklemek ya da
@@ -72,10 +75,12 @@ export const GIRISIM_DURUM_BILGISI: Record<GirisimDurum, { etiket: string; tur: 
 };
 
 export function DurumRozeti({ durum, className }: { durum: GirisimDurum; className?: string }) {
-  const bilgi = GIRISIM_DURUM_BILGISI[durum];
+  const t = useCeviri();
+  const tur = GIRISIM_DURUM_BILGISI[durum].tur;
+  const etiket = durum === "onayli" ? t.durum.onayli : t.durum.onayBekliyor;
   return (
-    <Rozet tur={bilgi.tur} className={className}>
-      {bilgi.etiket}
+    <Rozet tur={tur} className={className}>
+      {etiket}
     </Rozet>
   );
 }
@@ -91,6 +96,12 @@ export const AI_DURUM_BILGISI: Record<
   VERI_EKSIK: { etiket: "Veri Eksik", tur: "danger" },
 };
 
+const AI_DURUM_ANAHTARI: Record<NonNullable<AiDurum>, "hazir" | "izlemede" | "veriEksik"> = {
+  HAZIR: "hazir",
+  IZLEMEDE: "izlemede",
+  VERI_EKSIK: "veriEksik",
+};
+
 export function AiDurumRozeti({
   aiDurum,
   className,
@@ -98,11 +109,13 @@ export function AiDurumRozeti({
   aiDurum: AiDurum;
   className?: string;
 }) {
+  const t = useCeviri();
   if (!aiDurum) return null;
-  const bilgi = AI_DURUM_BILGISI[aiDurum];
+  const tur = AI_DURUM_BILGISI[aiDurum].tur;
+  const etiket = t.aiDurum[AI_DURUM_ANAHTARI[aiDurum]];
   return (
-    <Rozet tur={bilgi.tur} className={className}>
-      AI: {bilgi.etiket}
+    <Rozet tur={tur} className={className}>
+      AI: {etiket}
     </Rozet>
   );
 }
