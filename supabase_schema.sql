@@ -68,6 +68,14 @@ create table if not exists dokuman (
   yukleme_tarihi date default current_date
 );
 
+-- 7. sabitli_sorgular (AI Sorgu ekranından "panoya sabitle" ile eklenen sorular;
+-- Yönetici Raporu'ndaki kartlar her açılışta bu sorulara göre AI'ı yeniden sorgular)
+create table if not exists sabitli_sorgular (
+  id uuid primary key default gen_random_uuid(),
+  soru_metni text not null,
+  created_at timestamp not null default now()
+);
+
 -- RLS: MVP demo, gerçek login yok, anon key ile okuma serbest
 alter table girisim enable row level security;
 alter table program enable row level security;
@@ -75,6 +83,7 @@ alter table girisim_program_gecmisi enable row level security;
 alter table kullanici enable row level security;
 alter table satis_yatirim_kaydi enable row level security;
 alter table dokuman enable row level security;
+alter table sabitli_sorgular enable row level security;
 
 drop policy if exists "public select girisim" on girisim;
 drop policy if exists "public select program" on program;
@@ -83,6 +92,9 @@ drop policy if exists "public select kullanici" on kullanici;
 drop policy if exists "public select satis_yatirim_kaydi" on satis_yatirim_kaydi;
 drop policy if exists "public select dokuman" on dokuman;
 drop policy if exists "public update girisim" on girisim;
+drop policy if exists "public select sabitli_sorgular" on sabitli_sorgular;
+drop policy if exists "public insert sabitli_sorgular" on sabitli_sorgular;
+drop policy if exists "public delete sabitli_sorgular" on sabitli_sorgular;
 
 create policy "public select girisim" on girisim for select using (true);
 create policy "public select program" on program for select using (true);
@@ -90,10 +102,16 @@ create policy "public select girisim_program_gecmisi" on girisim_program_gecmisi
 create policy "public select kullanici" on kullanici for select using (true);
 create policy "public select satis_yatirim_kaydi" on satis_yatirim_kaydi for select using (true);
 create policy "public select dokuman" on dokuman for select using (true);
+create policy "public select sabitli_sorgular" on sabitli_sorgular for select using (true);
 
 -- Startup portalı ve admin onay ekranı girisim satırını güncelleyebilmeli
 -- (MVP demo: gerçek login yok, anon key ile güncelleme serbest; ileride auth eklenince daraltılmalı)
 create policy "public update girisim" on girisim for update using (true) with check (true);
+
+-- AI Sorgu ekranından soru sabitleme / Yönetici Raporu'ndan kaldırma
+-- (aynı MVP demo gerekçesiyle anon key ile serbest)
+create policy "public insert sabitli_sorgular" on sabitli_sorgular for insert with check (true);
+create policy "public delete sabitli_sorgular" on sabitli_sorgular for delete using (true);
 
 -- Örnek veri (demo/test için)
 insert into program (ad) values ('T3 Girişim Fabrikası'), ('Teknofest Hızlandırma');

@@ -70,3 +70,9 @@ export interface Dokuman {
   tur: string | null;
   yukleme_tarihi: string | null;
 }
+
+export interface SabitliSorgu {
+  id: string;
+  soru_metni: string;
+  created_at: string;
+}

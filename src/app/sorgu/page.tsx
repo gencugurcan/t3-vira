@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRole } from "@/context/RoleContext";
+import { AIYanit } from "@/components/AIYanit";
+import { supabase } from "@/lib/supabase";
 
 const ORNEK_SORULAR = [
   "Hangi girişimlerin AI durumu VERI_EKSIK?",
@@ -18,6 +20,9 @@ export default function SorguSayfasi() {
   const [cevap, setCevap] = useState<string | null>(null);
   const [yukleniyor, setYukleniyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
+  const [sabitleniyor, setSabitleniyor] = useState(false);
+  const [sabitlendi, setSabitlendi] = useState(false);
+  const [sabitlemeHatasi, setSabitlemeHatasi] = useState<string | null>(null);
 
   if (rol !== "karar_verici" && rol !== "super_admin") {
     return (
@@ -35,6 +40,8 @@ export default function SorguSayfasi() {
     setHata(null);
     setCevap(null);
     setGonderilenSoru(soru.trim());
+    setSabitlendi(false);
+    setSabitlemeHatasi(null);
     try {
       const res = await fetch("/api/sorgu", {
         method: "POST",
@@ -50,6 +57,26 @@ export default function SorguSayfasi() {
       setHata(e instanceof Error ? e.message : "Bilinmeyen hata");
     } finally {
       setYukleniyor(false);
+    }
+  }
+
+  // Sadece soru metnini panoya (sabitli_sorgular) kaydeder — cevap kaydedilmez,
+  // Yönetici Raporu'ndaki kart her açılışta AI'ı yeniden sorgulayıp güncel
+  // cevabı gösterir.
+  async function panoyaSabitle() {
+    if (!gonderilenSoru || sabitleniyor) return;
+    setSabitleniyor(true);
+    setSabitlemeHatasi(null);
+    try {
+      const { error } = await supabase
+        .from("sabitli_sorgular")
+        .insert({ soru_metni: gonderilenSoru });
+      if (error) throw new Error(error.message);
+      setSabitlendi(true);
+    } catch (e) {
+      setSabitlemeHatasi(e instanceof Error ? e.message : "Bilinmeyen hata");
+    } finally {
+      setSabitleniyor(false);
     }
   }
 
@@ -99,8 +126,40 @@ export default function SorguSayfasi() {
             <span className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white">
               AI
             </span>
-            <div className="max-w-[85%] whitespace-pre-line rounded-2xl rounded-tl-sm border border-border-subtle bg-surface px-4 py-3 text-sm text-foreground shadow-sm">
-              {cevap}
+            <div className="relative max-w-[85%] rounded-2xl rounded-tl-sm border border-border-subtle bg-surface px-4 py-3 pr-10 shadow-sm">
+              <button
+                onClick={panoyaSabitle}
+                disabled={sabitleniyor || sabitlendi}
+                title={sabitlendi ? "Panoya eklendi" : "Panoya sabitle"}
+                aria-label={sabitlendi ? "Panoya eklendi" : "Panoya sabitle"}
+                className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full transition disabled:cursor-default ${
+                  sabitlendi
+                    ? "text-success"
+                    : "text-foreground-muted hover:bg-surface-2 hover:text-foreground"
+                }`}
+              >
+                {sabitlendi ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                )}
+              </button>
+
+              <AIYanit metin={cevap} />
+
+              {sabitlendi && (
+                <p className="mt-2 text-xs text-success">Panoya eklendi</p>
+              )}
+              {sabitlemeHatasi && (
+                <p className="mt-2 text-xs text-danger">
+                  Panoya sabitlenemedi: {sabitlemeHatasi}
+                </p>
+              )}
             </div>
           </div>
         )}

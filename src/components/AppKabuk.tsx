@@ -34,6 +34,12 @@ const NAV_ITEMS: {
     icon: IconBarChart,
     roller: ["karar_verici", "super_admin"],
   },
+  {
+    href: "/karsilastir",
+    label: "Karşılaştır",
+    icon: IconColumns,
+    roller: ["karar_verici", "super_admin"],
+  },
 ];
 
 function IconHome({ className }: { className?: string }) {
@@ -73,6 +79,14 @@ function IconBarChart({ className }: { className?: string }) {
       <line x1="18" y1="20" x2="18" y2="10" />
       <line x1="12" y1="20" x2="12" y2="4" />
       <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  );
+}
+function IconColumns({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="18" rx="1" />
+      <rect x="14" y="3" width="7" height="18" rx="1" />
     </svg>
   );
 }
