@@ -37,7 +37,12 @@ const ARKAPLAN_DEGISKENLERI = {
   "--bg-login": `url(${GORSEL_LOGIN})`,
 } as React.CSSProperties;
 
-const BASLIKLAR = ["Başlık 1", "Başlık 2", "Başlık 3", "Başlık 4"];
+const BASLIKLAR = [
+  "Milli Teknoloji Hamlesi",
+  "Geleceğin Girişimleri Burada",
+  "Fikirden Ürüne",
+  "Birlikte Daha Güçlü",
+];
 
 // Her parallax fotoğrafının ana öznesi (uçak/helikopter gövdesi) farklı
 // dikey konumda olduğu için bg-center yetmiyor; her görsele ayrı dikey
@@ -247,7 +252,7 @@ export default function GirisSayfasi() {
           />
 
           <div className="relative px-6 text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-foreground [text-shadow:0_4px_24px_rgba(0,0,0,0.55)] sm:text-5xl md:text-6xl">
+            <h1 className="text-5xl font-bold tracking-tighter text-foreground [text-shadow:0_2px_10px_rgba(0,0,0,0.8),0_10px_40px_rgba(0,0,0,0.65)] sm:text-6xl md:text-7xl">
               {baslik}
             </h1>
           </div>
