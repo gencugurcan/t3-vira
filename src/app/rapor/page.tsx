@@ -153,11 +153,15 @@ export default function RaporSayfasi() {
   // tekrar tetiklenmeden kendiliginden cevrilmez). Dil degisince eski
   // (artik yanlis dildeki) raporu ekrandan kaldiriyoruz ki kullanici
   // yanlislikla guncel sanmasin; "Rapor Olustur" butonu tekrar basilmayi
-  // bekleyen ilk-yukleme haline doner.
-  useEffect(() => {
+  // bekleyen ilk-yukleme haline doner. Effect icinde setState yerine
+  // React'in "render sirasinda onceki degerle kiyasla" deseni kullaniliyor
+  // (react-hooks/set-state-in-effect kuralina takilmamak icin).
+  const [oncekiDil, setOncekiDil] = useState(dil);
+  if (dil !== oncekiDil) {
+    setOncekiDil(dil);
     setRapor(null);
     setHata(null);
-  }, [dil]);
+  }
 
   const [sabitliSorular, setSabitliSorular] = useState<SabitliSorgu[]>([]);
   const [sabitliYukleniyor, setSabitliYukleniyor] = useState(true);
