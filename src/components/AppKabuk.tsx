@@ -256,39 +256,6 @@ function AyarlarMenusu() {
   );
 }
 
-// Giris sonrasi bir kerelik goruntulenen, kendiliginden kaybolan hos geldin
-// bildirimi. Kalici bir metin yerine kucuk bir "toast": belirir, birkac
-// saniye kalir, sonra zarifce solarak/kayarak kaybolur.
-function HosGeldinBildirimi({ ad, onBitti }: { ad: string; onBitti: () => void }) {
-  const t = useCeviri();
-  const [gorunur, setGorunur] = useState(false);
-
-  useEffect(() => {
-    const girisZamanlayici = setTimeout(() => setGorunur(true), 20);
-    const cikisZamanlayici = setTimeout(() => setGorunur(false), 3200);
-    const kaldirZamanlayici = setTimeout(() => onBitti(), 3700);
-    return () => {
-      clearTimeout(girisZamanlayici);
-      clearTimeout(cikisZamanlayici);
-      clearTimeout(kaldirZamanlayici);
-    };
-  }, [onBitti]);
-
-  return (
-    <div
-      role="status"
-      className={`fixed right-4 top-4 z-50 flex items-center gap-3 rounded-xl border border-border-subtle bg-surface py-3 pl-4 pr-5 shadow-lg transition-all duration-500 ease-out ${
-        gorunur ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
-      }`}
-    >
-      <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-accent" />
-      <p className="text-sm font-medium text-foreground">
-        {t.ortak.tekrarHosGeldin}, {ad}
-      </p>
-    </div>
-  );
-}
-
 export function AppKabuk({ children }: { children: React.ReactNode }) {
   const { oturum } = useOturum();
   const { rol } = useRole();
@@ -325,21 +292,6 @@ export function AppKabuk({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute("data-theme", girisSayfasindaMi ? "dark" : tema);
   }, [girisSayfasindaMi, tema]);
 
-  // Girisin ilk basari anini (false -> true gecisi) yakalayip bir kerelik
-  // kendiliginden kapanan hos geldin bildirimini tetikliyoruz. Sayfa
-  // gecislerinde AppKabuk yeniden mount olmadigi icin bu, sekmedeki gercek
-  // "giris yapma / oturumu geri yukleme" anini takip eder.
-  const girisTakipRef = useRef(false);
-  const [selamGoster, setSelamGoster] = useState(false);
-
-  useEffect(() => {
-    const suankiGiris = hazir && oturum.girisYapildi;
-    if (suankiGiris && !girisTakipRef.current) {
-      setSelamGoster(true);
-    }
-    girisTakipRef.current = suankiGiris;
-  }, [hazir, oturum.girisYapildi]);
-
   if (girisSayfasindaMi) {
     return <>{children}</>;
   }
@@ -362,10 +314,6 @@ export function AppKabuk({ children }: { children: React.ReactNode }) {
       >
         <IconPanelLeft className="h-4 w-4" />
       </button>
-
-      {selamGoster && oturum.ad && (
-        <HosGeldinBildirimi ad={oturum.ad} onBitti={() => setSelamGoster(false)} />
-      )}
 
       <aside
         className={`flex flex-shrink-0 flex-col overflow-hidden border-r border-border-subtle bg-surface transition-[width] duration-200 ease-in-out ${
