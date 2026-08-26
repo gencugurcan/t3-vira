@@ -85,6 +85,7 @@ export const ceviriler = {
     },
     ortak: {
       tekrarHosGeldin: "Tekrar hoş geldin",
+      kapat: "Kapat",
       hata: "Hata",
       bilinmeyenHata: "Bilinmeyen hata",
       yukleniyor: "Yükleniyor...",
@@ -301,6 +302,7 @@ export const ceviriler = {
     },
     ortak: {
       tekrarHosGeldin: "Welcome back",
+      kapat: "Close",
       hata: "Error",
       bilinmeyenHata: "Unknown error",
       yukleniyor: "Loading...",
