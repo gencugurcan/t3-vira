@@ -39,6 +39,11 @@ const ARKAPLAN_DEGISKENLERI = {
 
 const BASLIKLAR = ["Başlık 1", "Başlık 2", "Başlık 3", "Başlık 4"];
 
+// Her parallax fotoğrafının ana öznesi (uçak/helikopter gövdesi) farklı
+// dikey konumda olduğu için bg-center yetmiyor; her görsele ayrı dikey
+// odak yüzdesi (bg-1..4 sırasıyla).
+const DIKEY_ODAK = [65, 50, 55, 40];
+
 export default function GirisSayfasi() {
   const router = useRouter();
   const { setRol } = useRole();
@@ -111,23 +116,37 @@ export default function GirisSayfasi() {
         const bg = section.querySelector<HTMLElement>(".parallax-bg");
         if (!bg) return;
 
+        const odak = DIKEY_ODAK[i] ?? 50;
+
+        // bg-1 (i===0) odak noktası zaten aşağı kaydırılmış (65%); üstüne
+        // tam parallax kayması binince resmin cover-slack payı taşıp
+        // section 1/2 arasında koyu boşluk açıyordu. Sadece ilk section'da
+        // hareket miktarı yarıya indiriliyor, diğerleri (çarpan 1) aynı.
+        const hareketOrani = i === 0 ? 0.5 : 1;
+
         // ÖNEMLİ: backgroundPosition değerleri düz string DEĞİL, fonksiyon.
         // invalidateOnRefresh:true ile ekran boyutu değiştiğinde GSAP bu
         // fonksiyonları yeniden çağırıp değerleri tazeliyor; sabit bir
         // string olsaydı resize sonrası parallax bozuk görünürdü.
+        // calc(${odak}% + ...px): taban dikey odak noktası (ana özneyi
+        // gösteren nokta) + parallax kayma miktarı üst üste bindiriliyor.
         gsap.fromTo(
           bg,
           {
+            // i===0: sayfa yüklenir yüklenmez ("top top") bu değer aktif
+            // oluyor; offset'li versiyon resmi aşağı itip tepede koyu
+            // boşluk bırakıyordu. Bu yüzden ilk section'da başlangıç
+            // kayması yok, doğrudan dikey odak noktası kullanılıyor.
             backgroundPosition: () =>
               i
-                ? `50% ${-window.innerHeight * getRatio(bg)}px`
-                : `50% ${window.innerHeight * (1 - getRatio(bg))}px`,
+                ? `50% calc(${odak}% + ${-window.innerHeight * getRatio(bg) * hareketOrani}px)`
+                : `50% ${odak}%`,
           },
           {
             backgroundPosition: () =>
               i
-                ? `50% ${window.innerHeight * (1 - getRatio(bg))}px`
-                : `50% ${-window.innerHeight * getRatio(bg)}px`,
+                ? `50% calc(${odak}% + ${window.innerHeight * (1 - getRatio(bg)) * hareketOrani}px)`
+                : `50% calc(${odak}% + ${-window.innerHeight * getRatio(bg) * hareketOrani}px)`,
             ease: "none",
             scrollTrigger: {
               trigger: section,
@@ -179,8 +198,11 @@ export default function GirisSayfasi() {
           className="parallax-section relative flex min-h-screen w-full items-center justify-center overflow-hidden"
         >
           <div
-            className="parallax-bg absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `var(--bg-${i + 1})` }}
+            className="parallax-bg absolute inset-0 -z-10 bg-cover bg-no-repeat"
+            style={{
+              backgroundImage: `var(--bg-${i + 1})`,
+              backgroundPosition: `center ${DIKEY_ODAK[i]}%`,
+            }}
             aria-hidden="true"
           />
 
@@ -280,6 +302,21 @@ export default function GirisSayfasi() {
           </form>
         </div>
       </section>
+
+      {/* ==========================================================
+          KAPANIŞ PAYI
+          Parallax section'larına dahil değil (GSAP/.parallax-section
+          seçicisine girmiyor), bu yüzden bg-1..4 ve DIKEY_ODAK'a
+          dokunmuyor. Sayfanın en altında login arka planının devamı
+          gibi doğal bir boşluk/pay bırakıyor.
+          ========================================================== */}
+      <div className="relative h-40 w-full overflow-hidden sm:h-56" aria-hidden="true">
+        <div
+          className="absolute inset-0 -z-20 bg-cover bg-no-repeat"
+          style={{ backgroundImage: "var(--bg-login)", backgroundPosition: "center 20%" }}
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background/90 to-background" />
+      </div>
     </div>
   );
 }
