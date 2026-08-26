@@ -16,15 +16,15 @@ import type { KullaniciRol } from "@/lib/types";
    ========================================================== */
 
 /* === RESİM 1 BURAYA === */
-const GORSEL_1 = "https://placehold.co/1920x1080/141726/4f6ef7?text=Bolum+1";
+const GORSEL_1 = "/images/giris/bg-1.jpg";
 /* === RESİM 2 BURAYA === */
-const GORSEL_2 = "https://placehold.co/1920x1080/1b1f33/7bb8ef?text=Bolum+2";
+const GORSEL_2 = "/images/giris/bg-2.jpg";
 /* === RESİM 3 BURAYA === */
-const GORSEL_3 = "https://placehold.co/1920x1080/0b0c18/4f6ef7?text=Bolum+3";
+const GORSEL_3 = "/images/giris/bg-3.jpg";
 /* === RESİM 4 BURAYA === */
-const GORSEL_4 = "https://placehold.co/1920x1080/141726/7bb8ef?text=Bolum+4";
+const GORSEL_4 = "/images/giris/bg-4.jpg";
 /* === RESİM LOGIN BURAYA === */
-const GORSEL_LOGIN = "https://placehold.co/1920x1080/0b0c18/4f6ef7?text=Giris";
+const GORSEL_LOGIN = "/images/giris/bg-login.png";
 
 // GSAP'in ve arka plan katmanlarının okuyabilmesi için gerçek CSS
 // değişkenleri olarak tanımlanıyor (--bg-1..4 / --bg-login), prototipteki
