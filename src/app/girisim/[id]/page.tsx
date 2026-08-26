@@ -2,17 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { AiDegerlendirme } from "@/components/AiDegerlendirme";
+import { DurumRozeti } from "@/components/Rozet";
 import type {
   Dokuman,
   Girisim,
   GirisimProgramGecmisi,
   SatisYatirimKaydi,
 } from "@/lib/types";
-
-const DURUM_RENK: Record<string, string> = {
-  onayli: "bg-[var(--accent-soft)] text-accent",
-  onay_bekliyor: "bg-surface-2 text-foreground-muted",
-};
 
 function paraFormatla(deger: number | null) {
   if (deger === null || deger === undefined) return "-";
@@ -95,13 +91,7 @@ export default async function GirisimDetaySayfasi(
             </p>
           </div>
           <div className="flex gap-2">
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${
-                DURUM_RENK[girisim.durum] ?? "bg-surface-2 text-foreground-muted"
-              }`}
-            >
-              {girisim.durum === "onayli" ? "Onaylı" : "Onay Bekliyor"}
-            </span>
+            <DurumRozeti durum={girisim.durum} />
           </div>
         </div>
 

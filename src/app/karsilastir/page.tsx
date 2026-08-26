@@ -4,14 +4,9 @@ import { useEffect, useState } from "react";
 import { useRole } from "@/context/RoleContext";
 import { supabase } from "@/lib/supabase";
 import { AIYanit } from "@/components/AIYanit";
+import { AiDurumRozeti } from "@/components/Rozet";
 import type { Girisim } from "@/lib/types";
 import type { KarsilastirmaGirisim, KarsilastirmaSonucu } from "@/app/api/karsilastir/route";
-
-const AI_DURUM_RENK: Record<string, string> = {
-  HAZIR: "bg-[var(--success-soft)] text-success",
-  IZLEMEDE: "bg-[var(--warning-soft)] text-warning",
-  VERI_EKSIK: "bg-[var(--danger-soft)] text-danger",
-};
 
 function paraFormatla(deger: number) {
   return new Intl.NumberFormat("tr-TR", {
@@ -26,15 +21,7 @@ function GirisimKarti({ girisim }: { girisim: KarsilastirmaGirisim }) {
     <div className="rounded-2xl border border-border-subtle bg-surface p-5 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-lg font-semibold text-foreground">{girisim.ad}</h3>
-        {girisim.ai_durum && (
-          <span
-            className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-              AI_DURUM_RENK[girisim.ai_durum] ?? "bg-surface-2 text-foreground-muted"
-            }`}
-          >
-            AI: {girisim.ai_durum}
-          </span>
-        )}
+        <AiDurumRozeti aiDurum={girisim.ai_durum} className="shrink-0" />
       </div>
 
       <p className="mt-1 text-sm text-foreground-muted">

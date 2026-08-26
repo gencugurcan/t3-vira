@@ -133,14 +133,20 @@ export function AppKabuk({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
+                className={`relative flex items-center gap-3 rounded-xl py-2.5 pl-3 pr-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                   aktif
                     ? "bg-accent-soft text-foreground"
                     : "text-foreground-muted hover:bg-surface-2 hover:text-foreground"
                 }`}
               >
-                <Icon className={aktif ? "text-accent" : ""} />
-                {item.label}
+                {aktif && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-y-1 left-0 w-1 rounded-r-full bg-accent"
+                  />
+                )}
+                <Icon className={`h-[18px] w-[18px] shrink-0 ${aktif ? "text-accent" : ""}`} />
+                <span className="leading-none">{item.label}</span>
               </Link>
             );
           })}

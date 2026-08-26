@@ -1,13 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { AiDurumRozeti } from "@/components/Rozet";
 import type { AiDurum } from "@/lib/types";
-
-const AI_DURUM_RENK: Record<string, string> = {
-  HAZIR: "bg-[var(--success-soft)] text-success",
-  IZLEMEDE: "bg-[var(--warning-soft)] text-warning",
-  VERI_EKSIK: "bg-[var(--danger-soft)] text-danger",
-};
 
 interface Props {
   girisimId: string;
@@ -46,15 +41,7 @@ export function AiDegerlendirme({ girisimId, initialAiDurum, initialAiGerekce }:
   return (
     <div className="mt-4 border-t border-border-subtle pt-4">
       <div className="flex flex-wrap items-center gap-3">
-        {aiDurum && (
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-medium ${
-              AI_DURUM_RENK[aiDurum] ?? "bg-surface-2 text-foreground-muted"
-            }`}
-          >
-            AI: {aiDurum}
-          </span>
-        )}
+        <AiDurumRozeti aiDurum={aiDurum} />
         <button
           onClick={degerlendir}
           disabled={yukleniyor}
