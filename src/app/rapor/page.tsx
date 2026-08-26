@@ -146,6 +146,16 @@ export default function RaporSayfasi() {
   const [yukleniyor, setYukleniyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
 
+  // Rapor AI tarafindan hangi dilde uretildiyse o dilde kalir (buton
+  // tekrar tetiklenmeden kendiliginden cevrilmez). Dil degisince eski
+  // (artik yanlis dildeki) raporu ekrandan kaldiriyoruz ki kullanici
+  // yanlislikla guncel sanmasin; "Rapor Olustur" butonu tekrar basilmayi
+  // bekleyen ilk-yukleme haline doner.
+  useEffect(() => {
+    setRapor(null);
+    setHata(null);
+  }, [dil]);
+
   const [sabitliSorular, setSabitliSorular] = useState<SabitliSorgu[]>([]);
   const [sabitliYukleniyor, setSabitliYukleniyor] = useState(true);
   const [sabitliHata, setSabitliHata] = useState<string | null>(null);
