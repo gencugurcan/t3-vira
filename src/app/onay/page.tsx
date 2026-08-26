@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRole } from "@/context/RoleContext";
 import { supabase } from "@/lib/supabase";
 import { useCeviri, ceviriler } from "@/lib/ceviriler";
 import { useDil } from "@/context/DilContext";
+import { useDokulmeVariants } from "@/lib/dokulme";
 import type { Girisim, GirisimBekleyenVeri } from "@/lib/types";
 
 type CeviriSozlugu = typeof ceviriler.tr;
@@ -54,6 +56,7 @@ export default function OnaySayfasi() {
   const t = useCeviri();
   const { dil } = useDil();
   const { rol } = useRole();
+  const { baslik, liste, oge } = useDokulmeVariants();
 
   const [girisimler, setGirisimler] = useState<Girisim[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
@@ -177,10 +180,12 @@ export default function OnaySayfasi() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground">{t.onay.baslik}</h1>
-      <p className="mt-1 text-sm text-foreground-muted">
-        {t.onay.aciklama}
-      </p>
+      <motion.div variants={baslik} initial="hidden" animate="visible">
+        <h1 className="text-2xl font-bold text-foreground">{t.onay.baslik}</h1>
+        <p className="mt-1 text-sm text-foreground-muted">
+          {t.onay.aciklama}
+        </p>
+      </motion.div>
 
       {yukleniyor && <p className="mt-6 text-sm text-foreground-muted">{t.ortak.yukleniyor}</p>}
 
@@ -194,12 +199,16 @@ export default function OnaySayfasi() {
         <p className="mt-6 text-sm text-foreground-muted">{t.onay.bosDurum}</p>
       )}
 
-      <div className="mt-6 space-y-3">
-        {girisimler.map((g) => (
-          <div
-            key={g.id}
-            className="rounded-2xl border border-border-subtle bg-surface p-4 shadow-sm"
-          >
+      <motion.div variants={liste} initial="hidden" animate="visible" className="mt-6 space-y-3">
+        <AnimatePresence>
+          {girisimler.map((g) => (
+            <motion.div
+              key={g.id}
+              variants={oge}
+              initial="hidden"
+              exit="exit"
+              className="rounded-2xl border border-border-subtle bg-surface p-4 shadow-sm"
+            >
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="font-semibold text-foreground">{g.ad}</p>
@@ -265,9 +274,10 @@ export default function OnaySayfasi() {
                 {t.ortak.hata}: {ozetHata[g.id]}
               </p>
             )}
-          </div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }

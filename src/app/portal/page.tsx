@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useRole } from "@/context/RoleContext";
 import { useCeviri } from "@/lib/ceviriler";
 import { supabase } from "@/lib/supabase";
+import { useDokulmeVariants } from "@/lib/dokulme";
 import type { Girisim, Program } from "@/lib/types";
 
 interface Form {
@@ -78,6 +80,7 @@ function girisimdenFormaCevir(g: Girisim): Form {
 export default function PortalSayfasi() {
   const { rol } = useRole();
   const t = useCeviri();
+  const { baslik: baslikVaryanti, liste, oge } = useDokulmeVariants();
 
   const [girisimler, setGirisimler] = useState<Girisim[]>([]);
   const [seciliId, setSeciliId] = useState<string>("");
@@ -293,8 +296,10 @@ export default function PortalSayfasi() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground">{baslik}</h1>
-      <p className="mt-1 text-sm text-foreground-muted">{aciklama}</p>
+      <motion.div variants={baslikVaryanti} initial="hidden" animate="visible">
+        <h1 className="text-2xl font-bold text-foreground">{baslik}</h1>
+        <p className="mt-1 text-sm text-foreground-muted">{aciklama}</p>
+      </motion.div>
 
       {yukleniyor && <p className="mt-6 text-sm text-foreground-muted">{t.ortak.yukleniyor}</p>}
 
@@ -302,8 +307,9 @@ export default function PortalSayfasi() {
         <p className="mt-6 text-sm text-foreground-muted">{t.portal.kayitliGirisimYok}</p>
       )}
 
+      <motion.div variants={liste} initial="hidden" animate="visible">
       {!yukleniyor && girisimler.length > 0 && (
-        <div className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+        <motion.div variants={oge} className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
           <div>
             <label className="block text-sm font-medium text-foreground-muted">
               {t.portal.girisimSec}
@@ -402,11 +408,11 @@ export default function PortalSayfasi() {
           >
             {kaydediliyor ? t.portal.kaydediliyor : t.portal.kaydet}
           </button>
-        </div>
+        </motion.div>
       )}
 
       {!yukleniyor && rol === "program_yoneticisi" && (
-        <div className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+        <motion.div variants={oge} className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
           <button
             onClick={() => setYeniGirisimAcik((v) => !v)}
             className="flex w-full items-center justify-between text-left"
@@ -522,11 +528,11 @@ export default function PortalSayfasi() {
               </button>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
 
       {!yukleniyor && rol === "program_yoneticisi" && girisimler.length > 0 && (
-        <div className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+        <motion.div variants={oge} className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
           <div>
             <h2 className="text-lg font-semibold text-foreground">{t.portal.programNotuEkleBaslik}</h2>
             <p className="mt-1 text-sm text-foreground-muted">
@@ -604,11 +610,11 @@ export default function PortalSayfasi() {
           >
             {notKaydediliyor ? t.portal.kaydediliyor : t.portal.notEkleButonu}
           </button>
-        </div>
+        </motion.div>
       )}
 
       {!yukleniyor && rol === "startup" && girisimler.length > 0 && (
-        <div className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+        <motion.div variants={oge} className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
           <div>
             <h2 className="text-lg font-semibold text-foreground">{t.portal.belgeEkleBaslik}</h2>
             <p className="mt-1 text-sm text-foreground-muted">
@@ -658,8 +664,9 @@ export default function PortalSayfasi() {
           >
             {belgeKaydediliyor ? t.portal.kaydediliyor : t.portal.belgeEkleBaslik}
           </button>
-        </div>
+        </motion.div>
       )}
+      </motion.div>
     </div>
   );
 }

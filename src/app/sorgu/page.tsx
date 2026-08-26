@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useRole } from "@/context/RoleContext";
 import { AIYanit } from "@/components/AIYanit";
 import { supabase } from "@/lib/supabase";
 import { useCeviri } from "@/lib/ceviriler";
 import { useDil } from "@/context/DilContext";
+import { useDokulmeVariants } from "@/lib/dokulme";
 
 export default function SorguSayfasi() {
   const t = useCeviri();
   const { rol } = useRole();
   const { dil } = useDil();
+  const { baslik, liste, oge } = useDokulmeVariants();
 
   const [soru, setSoru] = useState("");
   const [gonderilenSoru, setGonderilenSoru] = useState<string | null>(null);
@@ -79,27 +82,31 @@ export default function SorguSayfasi() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground">{t.sorgu.baslik}</h1>
-      <p className="mt-1 text-sm text-foreground-muted">
-        {t.sorgu.aciklama}
-      </p>
+      <motion.div variants={baslik} initial="hidden" animate="visible">
+        <h1 className="text-2xl font-bold text-foreground">{t.sorgu.baslik}</h1>
+        <p className="mt-1 text-sm text-foreground-muted">
+          {t.sorgu.aciklama}
+        </p>
+      </motion.div>
 
       <div className="mt-6 space-y-4">
-        <div className="flex flex-wrap gap-2">
+        <motion.div variants={liste} initial="hidden" animate="visible" className="flex flex-wrap gap-2">
           {t.sorgu.ornekSorular.map((s) => (
             // goster: dile gore degisen buton metni. gonder: /api/sorgu'ya
             // giden ve VERI_EKSIK gibi backend'in bekledigi ham degerleri
             // icat gercek sorgu - dil ne olursa olsun HEP orijinal Turkce
             // metin, boylece AI'a giden icerik/fonksiyonel davranis degismez.
-            <button
+            <motion.button
               key={s.goster}
+              variants={oge}
+              initial="hidden"
               onClick={() => setSoru(s.gonder)}
               className="rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-xs text-foreground-muted transition hover:bg-surface-2 hover:text-foreground"
             >
               {s.goster}
-            </button>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
 
         {gonderilenSoru && (
           <div className="flex justify-end">

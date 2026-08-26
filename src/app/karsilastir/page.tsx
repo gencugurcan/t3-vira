@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useRole } from "@/context/RoleContext";
 import { supabase } from "@/lib/supabase";
 import { AIYanit } from "@/components/AIYanit";
 import { AiDurumRozeti } from "@/components/Rozet";
 import { useCeviri } from "@/lib/ceviriler";
 import { useDil } from "@/context/DilContext";
+import { useDokulmeVariants } from "@/lib/dokulme";
 import type { Girisim } from "@/lib/types";
 import type { KarsilastirmaGirisim, KarsilastirmaSonucu } from "@/app/api/karsilastir/route";
 
@@ -64,6 +66,7 @@ export default function KarsilastirSayfasi() {
   const t = useCeviri();
   const { rol } = useRole();
   const { dil } = useDil();
+  const { baslik, gecikmeliBlok, liste, oge } = useDokulmeVariants();
 
   const [girisimler, setGirisimler] = useState<Girisim[]>([]);
   const [girisim1Id, setGirisim1Id] = useState("");
@@ -122,12 +125,19 @@ export default function KarsilastirSayfasi() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground">{t.karsilastir.baslik}</h1>
-      <p className="mt-1 text-sm text-foreground-muted">
-        {t.karsilastir.aciklama}
-      </p>
+      <motion.div variants={baslik} initial="hidden" animate="visible">
+        <h1 className="text-2xl font-bold text-foreground">{t.karsilastir.baslik}</h1>
+        <p className="mt-1 text-sm text-foreground-muted">
+          {t.karsilastir.aciklama}
+        </p>
+      </motion.div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm sm:grid-cols-2">
+      <motion.div
+        variants={gecikmeliBlok(0.1)}
+        initial="hidden"
+        animate="visible"
+        className="mt-6 grid grid-cols-1 gap-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm sm:grid-cols-2"
+      >
         <div>
           <label className="block text-sm font-medium text-foreground-muted">
             {t.karsilastir.girisim1}
@@ -171,7 +181,7 @@ export default function KarsilastirSayfasi() {
         >
           {yukleniyor ? t.karsilastir.karsilastiriliyor : t.karsilastir.karsilastirButonu}
         </button>
-      </div>
+      </motion.div>
 
       {hata && (
         <p className="mt-4 rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
@@ -180,21 +190,24 @@ export default function KarsilastirSayfasi() {
       )}
 
       {sonuc && (
-        <div className="mt-8 space-y-6">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <motion.div variants={liste} initial="hidden" animate="visible" className="mt-8 space-y-6">
+          <motion.div variants={oge} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <GirisimKarti girisim={sonuc.girisim1} />
             <GirisimKarti girisim={sonuc.girisim2} />
-          </div>
+          </motion.div>
 
-          <div className="rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+          <motion.div
+            variants={oge}
+            className="rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm"
+          >
             <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground-muted">
               {t.karsilastir.aiDegerlendirmesi}
             </h2>
             <div className="mt-3">
               <AIYanit metin={sonuc.yorum} />
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useRole } from "@/context/RoleContext";
 import { AIYanit } from "@/components/AIYanit";
 import { supabase } from "@/lib/supabase";
 import { useCeviri } from "@/lib/ceviriler";
 import { useDil } from "@/context/DilContext";
+import { useDokulmeVariants } from "@/lib/dokulme";
 import type { SabitliSorgu } from "@/lib/types";
 
 // Sabitlenmiş bir sorunun kartı: kendi sorusunu AI Sorgu'nun kullandığı
@@ -141,6 +143,7 @@ export default function RaporSayfasi() {
   const t = useCeviri();
   const { rol } = useRole();
   const { dil } = useDil();
+  const { baslik, gecikmeliBlok, liste, oge } = useDokulmeVariants();
 
   const [rapor, setRapor] = useState<string | null>(null);
   const [yukleniyor, setYukleniyor] = useState(false);
@@ -217,12 +220,19 @@ export default function RaporSayfasi() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground">{t.rapor.baslik}</h1>
-      <p className="mt-1 text-sm text-foreground-muted">
-        {t.rapor.aciklama}
-      </p>
+      <motion.div variants={baslik} initial="hidden" animate="visible">
+        <h1 className="text-2xl font-bold text-foreground">{t.rapor.baslik}</h1>
+        <p className="mt-1 text-sm text-foreground-muted">
+          {t.rapor.aciklama}
+        </p>
+      </motion.div>
 
-      <div className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
+      <motion.div
+        variants={gecikmeliBlok(0.1)}
+        initial="hidden"
+        animate="visible"
+        className="mt-6 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm"
+      >
         <button
           onClick={raporOlustur}
           disabled={yukleniyor}
@@ -242,15 +252,17 @@ export default function RaporSayfasi() {
             <AIYanit metin={rapor} />
           </div>
         )}
-      </div>
+      </motion.div>
 
       <div className="mt-10">
-        <h2 className="text-lg font-bold text-foreground">{t.rapor.sabitlenmisSorularBaslik}</h2>
-        <p className="mt-1 text-sm text-foreground-muted">
-          {t.rapor.sabitlenmisSorularAciklama}
-        </p>
+        <motion.div variants={gecikmeliBlok(0.2)} initial="hidden" animate="visible">
+          <h2 className="text-lg font-bold text-foreground">{t.rapor.sabitlenmisSorularBaslik}</h2>
+          <p className="mt-1 text-sm text-foreground-muted">
+            {t.rapor.sabitlenmisSorularAciklama}
+          </p>
+        </motion.div>
 
-        <div className="mt-4 space-y-4">
+        <motion.div variants={liste} initial="hidden" animate="visible" className="mt-4 space-y-4">
           {sabitliYukleniyor && (
             <p className="text-sm text-foreground-muted">{t.ortak.yukleniyor}</p>
           )}
@@ -268,9 +280,11 @@ export default function RaporSayfasi() {
           )}
 
           {sabitliSorular.map((s) => (
-            <SabitliSoruKarti key={s.id} soru={s} onKaldir={sabitliSoruKaldirildi} />
+            <motion.div key={s.id} variants={oge} initial="hidden" animate="visible">
+              <SabitliSoruKarti soru={s} onKaldir={sabitliSoruKaldirildi} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </div>
   );
