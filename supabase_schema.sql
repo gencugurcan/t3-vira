@@ -135,3 +135,35 @@ select id, 1500000, 300000, 'Seed', 2000000, 'TÜBİTAK 1512', '2024-03-15' from
 
 insert into dokuman (girisim_id, dosya, tur, yukleme_tarihi)
 select id, 'sunum.pdf', 'Sunum', '2024-03-01' from girisim where ad = 'UçanKod';
+
+-- ================= Kayıt + Rol Atama (basvuran rolü) =================
+-- Bu bloğu Supabase SQL Editor'e yapıştırıp çalıştır.
+
+-- 1) 'basvuran' rolünü check constraint'e ekle
+alter table kullanici drop constraint if exists kullanici_rol_check;
+alter table kullanici add constraint kullanici_rol_check
+  check (rol in ('super_admin', 'program_yoneticisi', 'startup', 'karar_verici', 'basvuran'));
+
+-- 2) Gerçek DB'de elle eklenmiş sifre_hash kolonunu şemaya resmen kaydet
+alter table kullanici add column if not exists sifre_hash text;
+
+-- 3) GÜVENLİK: sifre_hash'i anon select'ten çıkar (mevcut açık policy'yi kaldır)
+drop policy if exists "public select kullanici" on kullanici;
+
+-- 4) Rol atama ekranı için sifre_hash İÇERMEYEN bir view
+create or replace view kullanici_public as
+  select id, ad, eposta, rol from kullanici;
+
+grant select on kullanici_public to anon, authenticated;
+
+-- 5) Kayıt formu: anon INSERT sadece rol='basvuran' ile sınırlı
+--    (kimse kendini doğrudan super_admin olarak kaydedemez)
+drop policy if exists "public insert kullanici basvuran" on kullanici;
+create policy "public insert kullanici basvuran" on kullanici
+  for insert
+  with check (rol = 'basvuran');
+
+-- NOT: kullanici tablosuna UPDATE policy'si BİLİNÇLİ OLARAK eklenmiyor.
+-- Rol değişikliği sadece /api/rol-guncelle (service role key, RLS bypass)
+-- üzerinden yapılabilecek — anon key ile tarayıcıdan doğrudan rol
+-- yükseltme saldırısı mümkün olmayacak.

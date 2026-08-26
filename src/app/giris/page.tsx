@@ -53,6 +53,17 @@ export default function GirisSayfasi() {
   const [hata, setHata] = useState<string | null>(null);
   const [yukleniyor, setYukleniyor] = useState(false);
 
+  // Kayıt Ol modu: aynı /giris route'u içinde küçük bir mod anahtarı.
+  // Ayrı bir /kayit route'u AÇILAMAZ çünkü AppKabuk.tsx ve layout.tsx
+  // sadece pathname === "/giris" için oturumsuz erişime izin veriyor
+  // (bu iki dosyaya dokunulmuyor); /giris altında kalarak bu muafiyetten
+  // faydalanılıyor.
+  const [mod, setMod] = useState<"giris" | "kayit">("giris");
+  const [ad, setAd] = useState("");
+  const [sifreTekrar, setSifreTekrar] = useState("");
+  const [kayitYukleniyor, setKayitYukleniyor] = useState(false);
+  const [kayitHata, setKayitHata] = useState<string | null>(null);
+
   const kapsayiciRef = useRef<HTMLDivElement>(null);
 
   // ========================================================
@@ -80,6 +91,35 @@ export default function GirisSayfasi() {
       setHata(err instanceof Error ? err.message : "Bilinmeyen hata");
     } finally {
       setYukleniyor(false);
+    }
+  }
+
+  // Kayıt akışı: /api/kayit'e istek, başarılıysa girişle birebir aynı
+  // sonuç yolunu izler (setRol/girisYap/"/" yönlendirmesi) — yeni kayıt
+  // olan kullanıcı otomatik olarak "basvuran" rolüyle oturum açmış olur.
+  async function kayitOluyor(e: React.FormEvent) {
+    e.preventDefault();
+    setKayitHata(null);
+    if (sifre !== sifreTekrar) {
+      setKayitHata("Şifreler eşleşmiyor");
+      return;
+    }
+    setKayitYukleniyor(true);
+    try {
+      const res = await fetch("/api/kayit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ad, eposta, sifre }),
+      });
+      const veri = await res.json();
+      if (!res.ok) throw new Error(veri.error ?? "Kayıt başarısız");
+      setRol(veri.rol as KullaniciRol);
+      girisYap(veri.ad as string);
+      router.replace("/");
+    } catch (err) {
+      setKayitHata(err instanceof Error ? err.message : "Bilinmeyen hata");
+    } finally {
+      setKayitYukleniyor(false);
     }
   }
 
@@ -254,52 +294,151 @@ export default function GirisSayfasi() {
             </p>
           </div>
 
-          <form
-            onSubmit={girisYapiliyor}
-            className="space-y-4 rounded-3xl border border-border-subtle bg-surface/60 p-6 shadow-2xl backdrop-blur-xl sm:p-8"
-          >
-            <div>
-              <label className="block text-sm font-medium text-foreground-muted">
-                E-posta
-              </label>
-              <input
-                type="email"
-                required
-                value={eposta}
-                onChange={(e) => setEposta(e.target.value)}
-                placeholder="ornek@t3vira.app"
-                className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground-muted">
-                Şifre
-              </label>
-              <input
-                type="password"
-                required
-                value={sifre}
-                onChange={(e) => setSifre(e.target.value)}
-                placeholder="••••••••"
-                className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
-              />
-            </div>
-
-            {hata && (
-              <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
-                {hata}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={yukleniyor}
-              className="w-full rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+          {mod === "giris" ? (
+            <form
+              onSubmit={girisYapiliyor}
+              className="space-y-4 rounded-3xl border border-border-subtle bg-surface/60 p-6 shadow-2xl backdrop-blur-xl sm:p-8"
             >
-              {yukleniyor ? "Giriş yapılıyor..." : "Giriş Yap"}
-            </button>
-          </form>
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  E-posta
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={eposta}
+                  onChange={(e) => setEposta(e.target.value)}
+                  placeholder="ornek@t3vira.app"
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  Şifre
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={sifre}
+                  onChange={(e) => setSifre(e.target.value)}
+                  placeholder="••••••••"
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              {hata && (
+                <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
+                  {hata}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={yukleniyor}
+                className="w-full rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {yukleniyor ? "Giriş yapılıyor..." : "Giriş Yap"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMod("kayit");
+                  setHata(null);
+                }}
+                className="w-full text-center text-xs font-medium text-foreground-muted transition hover:text-foreground"
+              >
+                Hesabınız yok mu? Kayıt Ol
+              </button>
+            </form>
+          ) : (
+            <form
+              onSubmit={kayitOluyor}
+              className="space-y-4 rounded-3xl border border-border-subtle bg-surface/60 p-6 shadow-2xl backdrop-blur-xl sm:p-8"
+            >
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  Ad Soyad
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={ad}
+                  onChange={(e) => setAd(e.target.value)}
+                  placeholder="Ad Soyad"
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  E-posta
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={eposta}
+                  onChange={(e) => setEposta(e.target.value)}
+                  placeholder="ornek@t3vira.app"
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  Şifre
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={sifre}
+                  onChange={(e) => setSifre(e.target.value)}
+                  placeholder="En az 6 karakter"
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground-muted">
+                  Şifre Tekrar
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={sifreTekrar}
+                  onChange={(e) => setSifreTekrar(e.target.value)}
+                  placeholder="••••••••"
+                  className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
+                />
+              </div>
+
+              {kayitHata && (
+                <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
+                  {kayitHata}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={kayitYukleniyor}
+                className="w-full rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {kayitYukleniyor ? "Kayıt yapılıyor..." : "Kayıt Ol"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMod("giris");
+                  setKayitHata(null);
+                }}
+                className="w-full text-center text-xs font-medium text-foreground-muted transition hover:text-foreground"
+              >
+                Zaten hesabınız var mı? Giriş Yap
+              </button>
+            </form>
+          )}
         </div>
       </section>
 
