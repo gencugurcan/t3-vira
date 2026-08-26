@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useOturum } from "@/context/OturumContext";
 import { useRole } from "@/context/RoleContext";
 import { useTema } from "@/context/TemaContext";
@@ -11,6 +12,10 @@ import { useSidebar } from "@/context/SidebarContext";
 import { ceviriler, useCeviri } from "@/lib/ceviriler";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
 import type { KullaniciRol } from "@/lib/types";
+
+// Ana Sayfa'daki girisim kartlarinin dokulme (stagger fade+slide) efektiyle
+// gorsel tutarlilik icin ayni desen: motion.create(Link).
+const MotionLink = motion.create(Link);
 
 const NAV_ITEMS: {
   href: string;
@@ -262,6 +267,7 @@ export function AppKabuk({ children }: { children: React.ReactNode }) {
   const { tema } = useTema();
   const { acik: sidebarAcik, sidebarDegistir } = useSidebar();
   const t = useCeviri();
+  const azaltilmisHareket = useReducedMotion();
   const pathname = usePathname();
   const router = useRouter();
   const girisSayfasindaMi = pathname === "/giris";
@@ -300,6 +306,54 @@ export function AppKabuk({ children }: { children: React.ReactNode }) {
     return null;
   }
 
+  // Ana Sayfa'daki girisim kartlariyla ayni dokulme deseni: ust basliktan
+  // (logo/ayarlar) baslayip nav ogelerini sirayla dokup en sonda alt
+  // bilgiyi (rol/cikis) gostererek biter. Rol filtresine gore gorunur
+  // oge sayisi degistigi icin alt bilginin gecikmesi buna gore hesaplanir.
+  const gorunurOgeler = NAV_ITEMS.filter((item) => !item.roller || item.roller.includes(rol));
+
+  const ustBaslikVariants = {
+    hidden: azaltilmisHareket ? { opacity: 1 } : { opacity: 0, y: -10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: azaltilmisHareket ? 0 : 0.35 },
+    },
+  };
+
+  const navListesiVariants = {
+    hidden: {},
+    visible: {
+      transition: azaltilmisHareket ? {} : { staggerChildren: 0.06, delayChildren: 0.15 },
+    },
+  };
+
+  const navOgesiVariants = {
+    hidden: azaltilmisHareket ? { opacity: 1 } : { opacity: 0, y: 10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: azaltilmisHareket ? 0 : 0.3 },
+    },
+    exit: {
+      opacity: azaltilmisHareket ? 1 : 0,
+      x: azaltilmisHareket ? 0 : -8,
+      transition: { duration: azaltilmisHareket ? 0 : 0.2 },
+    },
+  };
+
+  const altBilgiVariants = {
+    hidden: azaltilmisHareket ? { opacity: 1 } : { opacity: 0, y: 10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: azaltilmisHareket ? 0 : 0.35,
+        delay: azaltilmisHareket ? 0 : 0.15 + gorunurOgeler.length * 0.06 + 0.05,
+      },
+    },
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Kenar çubuğu aç/kapat: aside'ın DIŞINDA, sabit konumlu — sidebar
@@ -324,44 +378,64 @@ export function AppKabuk({ children }: { children: React.ReactNode }) {
             sırasında metin/ikonlar sıkışıp yeniden dizilmesin — sadece
             kırpılıp kayarak kaybolsun. */}
         <div className="flex w-60 flex-1 flex-col">
-          <div className="flex items-center justify-between py-5 pl-16 pr-5">
+          <motion.div
+            variants={ustBaslikVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex items-center justify-between py-5 pl-16 pr-5"
+          >
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-foreground">
               <img src="/vira-mark.png" alt="Vira" className="h-6 w-auto" />
               vira
             </Link>
             <AyarlarMenusu />
-          </div>
+          </motion.div>
 
-          <nav className="flex-1 space-y-1 px-3">
-            {NAV_ITEMS.filter((item) => !item.roller || item.roller.includes(rol)).map((item) => {
-              const aktif = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`relative flex items-center gap-3 rounded-xl py-2.5 pl-3 pr-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                    aktif
-                      ? "bg-accent-soft text-foreground"
-                      : "text-foreground-muted hover:bg-surface-2 hover:text-foreground"
-                  }`}
-                >
-                  {aktif && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-y-1 left-0 w-1 rounded-r-full bg-accent"
-                    />
-                  )}
-                  <Icon className={`h-[18px] w-[18px] shrink-0 ${aktif ? "text-accent" : ""}`} />
-                  <span className="leading-none">{t.nav[item.labelKey]}</span>
-                </Link>
-              );
-            })}
-          </nav>
+          <motion.nav
+            variants={navListesiVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex-1 space-y-1 px-3"
+          >
+            <AnimatePresence>
+              {gorunurOgeler.map((item) => {
+                const aktif = pathname === item.href;
+                const Icon = item.icon;
+                return (
+                  <MotionLink
+                    key={item.href}
+                    href={item.href}
+                    variants={navOgesiVariants}
+                    initial="hidden"
+                    exit="exit"
+                    className={`relative flex items-center gap-3 rounded-xl py-2.5 pl-3 pr-3 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                      aktif
+                        ? "bg-accent-soft text-foreground"
+                        : "text-foreground-muted hover:bg-surface-2 hover:text-foreground"
+                    }`}
+                  >
+                    {aktif && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-y-1 left-0 w-1 rounded-r-full bg-accent"
+                      />
+                    )}
+                    <Icon className={`h-[18px] w-[18px] shrink-0 ${aktif ? "text-accent" : ""}`} />
+                    <span className="leading-none">{t.nav[item.labelKey]}</span>
+                  </MotionLink>
+                );
+              })}
+            </AnimatePresence>
+          </motion.nav>
 
-          <div className="border-t border-border-subtle p-3">
+          <motion.div
+            variants={altBilgiVariants}
+            initial="hidden"
+            animate="visible"
+            className="border-t border-border-subtle p-3"
+          >
             <RoleSwitcher />
-          </div>
+          </motion.div>
         </div>
       </aside>
 
