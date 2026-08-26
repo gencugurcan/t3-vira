@@ -14,6 +14,7 @@ export const ceviriler = {
       aiSorgu: "AI Sorgu",
       yoneticiRaporu: "Yönetici Raporu",
       karsilastir: "Karşılaştır",
+      kullanicilar: "Kullanıcılar",
     },
     ayarlar: {
       baslik: "Ayarlar",
@@ -95,6 +96,7 @@ export const ceviriler = {
         program_yoneticisi: "Program Yöneticisi",
         startup: "Startup",
         karar_verici: "Karar Verici",
+        basvuran: "Başvuran",
       },
     },
     karsilastir: {
@@ -165,6 +167,7 @@ export const ceviriler = {
       aiSorgu: "AI Query",
       yoneticiRaporu: "Executive Report",
       karsilastir: "Compare",
+      kullanicilar: "Users",
     },
     ayarlar: {
       baslik: "Settings",
@@ -246,6 +249,7 @@ export const ceviriler = {
         program_yoneticisi: "Program Manager",
         startup: "Startup",
         karar_verici: "Decision Maker",
+        basvuran: "Applicant",
       },
     },
     karsilastir: {

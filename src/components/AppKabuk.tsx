@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useOturum } from "@/context/OturumContext";
 import { useRole } from "@/context/RoleContext";
 import { useTema } from "@/context/TemaContext";
@@ -254,11 +254,16 @@ export function AppKabuk({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const girisSayfasindaMi = pathname === "/giris";
-  const [hazir, setHazir] = useState(false);
-
-  useEffect(() => {
-    setHazir(true);
-  }, []);
+  // Sunucuda render edilen ilk çıktı ile istemcinin hydration sonrası
+  // durumu kasıtlı olarak farklı (oturum kontrolü sadece client'ta
+  // anlamlı) — bu yüzden setState içeren bir effect yerine, projedeki
+  // diğer tüm hydration-güvenli değerlerle aynı useSyncExternalStore
+  // deseni kullanılıyor.
+  const hazir = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
     if (hazir && !oturum.girisYapildi && !girisSayfasindaMi) {
