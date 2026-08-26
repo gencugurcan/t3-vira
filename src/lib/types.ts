@@ -19,9 +19,11 @@ export interface Girisim {
   id: string;
   ad: string;
   sektor: string | null;
+  sektor_en: string | null;
   kurulus_yili: number | null;
   logo: string | null;
   kisa_aciklama: string | null;
+  kisa_aciklama_en: string | null;
   teknoloji: string[] | null;
   ekip_buyuklugu: number | null;
   durum: GirisimDurum;

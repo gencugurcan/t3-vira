@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AiDegerlendirme } from "@/components/AiDegerlendirme";
 import { DurumRozeti } from "@/components/Rozet";
 import { useCeviri } from "@/lib/ceviriler";
+import { useDil } from "@/context/DilContext";
 import type { Dokuman, Girisim, GirisimProgramGecmisi, SatisYatirimKaydi } from "@/lib/types";
 
 function paraFormatla(deger: number | null) {
@@ -33,6 +34,10 @@ export function GirisimDetayIcerik({
   dokumanlar,
 }: Props) {
   const t = useCeviri();
+  const { dil } = useDil();
+  const sektor = dil === "en" ? (girisim.sektor_en ?? girisim.sektor) : girisim.sektor;
+  const kisaAciklama =
+    dil === "en" ? (girisim.kisa_aciklama_en ?? girisim.kisa_aciklama) : girisim.kisa_aciklama;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -46,7 +51,7 @@ export function GirisimDetayIcerik({
           <div>
             <h1 className="text-2xl font-bold text-foreground">{girisim.ad}</h1>
             <p className="mt-1 text-sm text-foreground-muted">
-              {girisim.sektor ?? t.girisimDetay.sektorBelirtilmemis}
+              {sektor ?? t.girisimDetay.sektorBelirtilmemis}
               {girisim.kurulus_yili ? ` · ${t.girisimDetay.kurulus}: ${girisim.kurulus_yili}` : ""}
             </p>
           </div>
@@ -55,8 +60,8 @@ export function GirisimDetayIcerik({
           </div>
         </div>
 
-        {girisim.kisa_aciklama && (
-          <p className="mt-4 text-sm text-foreground-muted">{girisim.kisa_aciklama}</p>
+        {kisaAciklama && (
+          <p className="mt-4 text-sm text-foreground-muted">{kisaAciklama}</p>
         )}
 
         <AiDegerlendirme

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { supabase } from "@/lib/supabase";
 
-const SISTEM_MESAJI_ON_EKI = `Sen bir girişim ekosistemi analiz asistanısın. Sana ekosistemdeki TÜM girişimlerin güncel verisi verilecek. Karar vericinin sorusunu, SADECE bu veriye dayanarak yanıtla.
+const SISTEM_MESAJI_ON_EKI_TR = `Sen bir girişim ekosistemi analiz asistanısın. Sana ekosistemdeki TÜM girişimlerin güncel verisi verilecek. Karar vericinin sorusunu, SADECE bu veriye dayanarak yanıtla.
 KURALLAR:
 - Sadece verilen veriye dayan. Veride olmayan bir şey uydurma. Bilgi yoksa 'bu konuda veri bulunmuyor' de.
 - Cevabını hangi girişimlere dayandırdığını belirt (girişim adlarını yaz).
@@ -10,11 +10,21 @@ KURALLAR:
 - Kesin/otoriter karar dili kullanma; sen analiz ve ön değerlendirme sunuyorsun, nihai kararı karar verici verir.
 - Türkçe, net ve kısa yanıtla.`;
 
+const SISTEM_MESAJI_ON_EKI_EN = `You are a venture ecosystem analysis assistant. You will be given the current data for ALL ventures in the ecosystem. Answer the decision maker's question based ONLY on this data.
+RULES:
+- Rely only on the given data. Do not make up anything not in the data. If there is no information, say 'no data is available on this'.
+- State which ventures your answer is based on (write the venture names).
+- For numeric questions, give an exact number and list those ventures.
+- Do NOT use definitive/authoritative decision language; you provide analysis and a preliminary assessment, the final decision belongs to the decision maker.
+- Respond in English, clearly and concisely.`;
+
 export async function POST(request: NextRequest) {
   let soru: string | undefined;
+  let dil: string | undefined;
   try {
     const body = await request.json();
     soru = body.soru;
+    dil = body.dil;
   } catch {
     return NextResponse.json({ error: "Geçersiz istek gövdesi" }, { status: 400 });
   }
@@ -22,6 +32,7 @@ export async function POST(request: NextRequest) {
   if (!soru || !soru.trim()) {
     return NextResponse.json({ error: "soru gerekli" }, { status: 400 });
   }
+  const ingilizce = dil === "en";
 
   const [girisimRes, programRes, gecmisRes, satisRes] = await Promise.all([
     supabase.from("girisim").select("*"),
@@ -32,7 +43,10 @@ export async function POST(request: NextRequest) {
 
   const bugun = new Date().toISOString().slice(0, 10);
 
-  const sistemMesaji = `${SISTEM_MESAJI_ON_EKI}
+  const sistemMesaji = ingilizce
+    ? `${SISTEM_MESAJI_ON_EKI_EN}
+- Today's date is ${bugun} — use this for date-based questions.`
+    : `${SISTEM_MESAJI_ON_EKI_TR}
 - Bugünün tarihi: ${bugun} — tarih bazlı sorularda bunu kullan.`;
 
   const kullaniciMesaji = `Girişimler:

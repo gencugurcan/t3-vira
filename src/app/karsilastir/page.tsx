@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { AIYanit } from "@/components/AIYanit";
 import { AiDurumRozeti } from "@/components/Rozet";
 import { useCeviri } from "@/lib/ceviriler";
+import { useDil } from "@/context/DilContext";
 import type { Girisim } from "@/lib/types";
 import type { KarsilastirmaGirisim, KarsilastirmaSonucu } from "@/app/api/karsilastir/route";
 
@@ -19,6 +20,10 @@ function paraFormatla(deger: number) {
 
 function GirisimKarti({ girisim }: { girisim: KarsilastirmaGirisim }) {
   const t = useCeviri();
+  const { dil } = useDil();
+  const sektor = dil === "en" ? (girisim.sektor_en ?? girisim.sektor) : girisim.sektor;
+  const kisaAciklama =
+    dil === "en" ? (girisim.kisa_aciklama_en ?? girisim.kisa_aciklama) : girisim.kisa_aciklama;
   return (
     <div className="rounded-2xl border border-border-subtle bg-surface p-5 shadow-sm">
       <div className="flex items-start justify-between gap-2">
@@ -27,12 +32,12 @@ function GirisimKarti({ girisim }: { girisim: KarsilastirmaGirisim }) {
       </div>
 
       <p className="mt-1 text-sm text-foreground-muted">
-        {girisim.sektor ?? t.karsilastir.sektorBelirtilmemis}
+        {sektor ?? t.karsilastir.sektorBelirtilmemis}
         {girisim.kurulus_yili ? ` · ${girisim.kurulus_yili}` : ""}
       </p>
 
-      {girisim.kisa_aciklama && (
-        <p className="mt-2 text-sm text-foreground-muted">{girisim.kisa_aciklama}</p>
+      {kisaAciklama && (
+        <p className="mt-2 text-sm text-foreground-muted">{kisaAciklama}</p>
       )}
 
       <dl className="mt-4 space-y-2 border-t border-border-subtle pt-4 text-sm">
@@ -58,6 +63,7 @@ function GirisimKarti({ girisim }: { girisim: KarsilastirmaGirisim }) {
 export default function KarsilastirSayfasi() {
   const t = useCeviri();
   const { rol } = useRole();
+  const { dil } = useDil();
 
   const [girisimler, setGirisimler] = useState<Girisim[]>([]);
   const [girisim1Id, setGirisim1Id] = useState("");
@@ -95,7 +101,7 @@ export default function KarsilastirSayfasi() {
       const res = await fetch("/api/karsilastir", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ girisim1Id, girisim2Id }),
+        body: JSON.stringify({ girisim1Id, girisim2Id, dil }),
       });
       const veri = await res.json();
       if (!res.ok) {

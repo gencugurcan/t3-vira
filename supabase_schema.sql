@@ -167,3 +167,26 @@ create policy "public insert kullanici basvuran" on kullanici
 -- Rol değişikliği sadece /api/rol-guncelle (service role key, RLS bypass)
 -- üzerinden yapılabilecek — anon key ile tarayıcıdan doğrudan rol
 -- yükseltme saldırısı mümkün olmayacak.
+
+-- ================= EN dil modu: girişim sektör/açıklama çevirisi =================
+-- Dil EN'e alınınca sektor_en / kisa_aciklama_en gösterilir; boşsa (örn. Portal'dan
+-- eklenen yeni bir girişim henüz çevrilmediyse) kod tarafında otomatik olarak
+-- Türkçe orijinaline düşülür (bkz. sayfalardaki dil==="en" ? (x_en ?? x) : x deseni).
+alter table girisim add column if not exists sektor_en text;
+alter table girisim add column if not exists kisa_aciklama_en text;
+
+update girisim set sektor_en = 'Defense / Air Defense', kisa_aciklama_en = 'Low-altitude air defense systems. (test)' where ad = 'Alp Hava Savunma';
+update girisim set sektor_en = 'Defense / Sensors', kisa_aciklama_en = 'Electro-optical sensor systems for aerial platforms.' where ad = 'Anka Sensör';
+update girisim set sektor_en = 'Naval Defense / Sonar', kisa_aciklama_en = 'Sonar systems for submarines and ships.' where ad = 'Barbaros Sonar Sistemleri';
+update girisim set sektor_en = 'Defense / UAV', kisa_aciklama_en = 'Manufactures tactical and reconnaissance unmanned aerial vehicles.' where ad = 'Bozok İHA Sistemleri';
+update girisim set sektor_en = 'Naval Defense', kisa_aciklama_en = 'Autonomous navigation and defense systems for naval platforms.' where ad = 'Deniz Kartalı Denizcilik';
+update girisim set sektor_en = 'Defense / Mini UAV', kisa_aciklama_en = 'Squad-level mini reconnaissance drones.' where ad = 'Efe Drone';
+update girisim set sektor_en = 'Aviation / Propulsion', kisa_aciklama_en = 'Electric propulsion motors for UAVs.' where ad = 'Ejder Motor Teknolojileri';
+update girisim set sektor_en = 'Aviation / Avionics', kisa_aciklama_en = 'Develops domestic avionics systems for military and civil aircraft.' where ad = 'Göktürk Aviyonik';
+update girisim set sektor_en = 'Defense / Optics', kisa_aciklama_en = 'Thermal and night-vision optical systems.' where ad = 'Kılıç Optik Sistemler';
+update girisim set sektor_en = 'Space / Propulsion', kisa_aciklama_en = 'Hybrid propulsion systems for rockets and satellites.' where ad = 'Meriç İtki Teknolojileri';
+update girisim set sektor_en = 'Cybersecurity', kisa_aciklama_en = 'Cyber defense solutions for critical infrastructure.' where ad = 'Pusat Siber Güvenlik';
+update girisim set sektor_en = 'Defense / Artificial Intelligence', kisa_aciklama_en = 'Image-processing AI for defense applications.' where ad = 'Simurg Yapay Zeka';
+update girisim set sektor_en = 'Space / Communications', kisa_aciklama_en = 'Satellite communication terminals.' where ad = 'Tuğrul Haberleşme';
+update girisim set sektor_en = 'Defense / Radar', kisa_aciklama_en = 'Develops short-range surveillance radar.' where ad = 'Turaç Radar';
+update girisim set sektor_en = 'Space / Satellite', kisa_aciklama_en = 'Small satellite (CubeSat) design and ground station solutions.' where ad = 'Yıldızlar Uzay Teknolojileri';

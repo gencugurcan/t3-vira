@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AiDurumRozeti } from "@/components/Rozet";
 import { useCeviri } from "@/lib/ceviriler";
+import { useDil } from "@/context/DilContext";
 import type { AiDurum } from "@/lib/types";
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 
 export function AiDegerlendirme({ girisimId, initialAiDurum, initialAiGerekce }: Props) {
   const t = useCeviri();
+  const { dil } = useDil();
   const [aiDurum, setAiDurum] = useState<AiDurum>(initialAiDurum);
   const [aiGerekce, setAiGerekce] = useState<string | null>(initialAiGerekce);
   const [yukleniyor, setYukleniyor] = useState(false);
@@ -25,7 +27,7 @@ export function AiDegerlendirme({ girisimId, initialAiDurum, initialAiGerekce }:
       const res = await fetch("/api/skor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ girisim_id: girisimId }),
+        body: JSON.stringify({ girisim_id: girisimId, dil }),
       });
       const veri = await res.json();
       if (!res.ok) {
