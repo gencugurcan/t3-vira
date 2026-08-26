@@ -18,6 +18,50 @@
   --danger-soft: rgba(241, 87, 110, 0.14);
 }
 
+/* Aydınlık tema: aynı token isimleri, açık zeminde okunaklı karşılıkları.
+   Marka rengi (accent) ve success/warning/danger aynı hue ailesinde ama
+   beyaz/açık gri zeminde AA kontrastı tutturacak kadar koyulaştırıldı. */
+[data-theme="light"] {
+  --background: #F5F6FA;
+  --surface: #FFFFFF;
+  --surface-2: #EDEFF6;
+  --border-subtle: #DDE1EC;
+  --foreground: #13141F;
+  --foreground-muted: #5B5F74;
+  --accent: #3853D3;
+  --accent-soft: rgba(56, 83, 211, 0.12);
+  --accent-2: #2E6FB0;
+  --success: #1C8F5B;
+  --success-soft: rgba(28, 143, 91, 0.12);
+  --warning: #A15D07;
+  --warning-soft: rgba(161, 93, 7, 0.12);
+  --danger: #C92C48;
+  --danger-soft: rgba(201, 44, 72, 0.12);
+}
+
+/* :root ile birebir aynı (koyu) değerler — /giris gibi genel tema
+   geçişinden bağımsız kalması gereken bölümler kendi köklerine
+   data-theme="dark" koyarak, üstteki <html>'de aydınlık tema aktif olsa
+   bile bu değerleri geri kazanabilsin. (CSS custom property kalıtımı,
+   en yakın atanın değerini kullanır — :root tek başına bunu sağlamaz.) */
+[data-theme="dark"] {
+  --background: #0B0C18;
+  --surface: #141726;
+  --surface-2: #1B1F33;
+  --border-subtle: #262A42;
+  --foreground: #F2F3F8;
+  --foreground-muted: #8B8FA6;
+  --accent: #4F6EF7;
+  --accent-soft: rgba(79, 110, 247, 0.16);
+  --accent-2: #7BB8EF;
+  --success: #3DD68C;
+  --success-soft: rgba(61, 214, 140, 0.14);
+  --warning: #F2B84B;
+  --warning-soft: rgba(242, 184, 75, 0.14);
+  --danger: #F1576E;
+  --danger-soft: rgba(241, 87, 110, 0.14);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -161,7 +161,12 @@ export default function GirisSayfasi() {
   }
 
   return (
-    <div ref={kapsayiciRef} style={ARKAPLAN_DEGISKENLERI} className="relative">
+    <div
+      ref={kapsayiciRef}
+      data-theme="dark"
+      style={ARKAPLAN_DEGISKENLERI}
+      className="relative"
+    >
       {/* ==========================================================
           PARALLAX BÖLÜMLERİ (1-4)
           tasarim/parallax-giris/ prototipiyle aynı yapı: her

@@ -344,7 +344,7 @@ export default function AnaSayfa() {
             <select
               value={siralamaAlani}
               onChange={(e) => setSiralamaAlani(e.target.value as SiralamaAlani)}
-              className="appearance-none bg-transparent py-2 pl-3 pr-7 text-sm text-foreground focus:outline-none"
+              className="appearance-none bg-surface py-2 pl-3 pr-7 text-sm text-foreground focus:outline-none"
               aria-label="Sıralama alanı"
             >
               <option value="ad">Ada göre</option>
