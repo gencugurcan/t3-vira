@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useRole } from "@/context/RoleContext";
 import { useOturum } from "@/context/OturumContext";
 import { supabase } from "@/lib/supabase";
+import { useCeviri } from "@/lib/ceviriler";
 import type { Kullanici, KullaniciRol } from "@/lib/types";
 
 export default function KullanicilarSayfasi() {
+  const t = useCeviri();
   const { rol, roller } = useRole();
   const { oturum } = useOturum();
 
@@ -47,7 +49,7 @@ export default function KullanicilarSayfasi() {
 
   async function rolGuncelle(hedefId: string, yeniRol: KullaniciRol) {
     if (!callerEposta) {
-      setHata("Kimliğiniz doğrulanamadı, lütfen tekrar giriş yapın");
+      setHata(t.kullanicilar.kimlikDogrulanamadi);
       return;
     }
     setHata(null);
@@ -59,12 +61,12 @@ export default function KullanicilarSayfasi() {
         body: JSON.stringify({ callerEposta, hedefId, yeniRol }),
       });
       const veri = await res.json();
-      if (!res.ok) throw new Error(veri.error ?? "Rol güncellenemedi");
+      if (!res.ok) throw new Error(veri.error ?? t.kullanicilar.rolGuncellenemedi);
       setKullanicilar((prev) =>
         prev.map((k) => (k.id === hedefId ? { ...k, rol: yeniRol } : k)),
       );
     } catch (err) {
-      setHata(err instanceof Error ? err.message : "Bilinmeyen hata");
+      setHata(err instanceof Error ? err.message : t.ortak.bilinmeyenHata);
     } finally {
       setGuncellenenId(null);
     }
@@ -74,7 +76,7 @@ export default function KullanicilarSayfasi() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8">
         <p className="rounded-lg bg-[var(--warning-soft)] px-4 py-3 text-sm text-warning">
-          Bu sayfa sadece Süper Admin rolü içindir.
+          {t.ortak.sadeceSuperAdmin}
         </p>
       </div>
     );
@@ -82,9 +84,9 @@ export default function KullanicilarSayfasi() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-1 text-2xl font-semibold text-foreground">Kullanıcılar</h1>
+      <h1 className="mb-1 text-2xl font-semibold text-foreground">{t.kullanicilar.baslik}</h1>
       <p className="mb-6 text-sm text-foreground-muted">
-        Kayıt olan kullanıcıları görüntüle ve rol ata.
+        {t.kullanicilar.aciklama}
       </p>
 
       {hata && (
@@ -94,17 +96,17 @@ export default function KullanicilarSayfasi() {
       )}
 
       {yukleniyor ? (
-        <p className="text-sm text-foreground-muted">Yükleniyor...</p>
+        <p className="text-sm text-foreground-muted">{t.ortak.yukleniyor}</p>
       ) : kullanicilar.length === 0 ? (
-        <p className="text-sm text-foreground-muted">Henüz kayıtlı kullanıcı yok.</p>
+        <p className="text-sm text-foreground-muted">{t.kullanicilar.bosDurum}</p>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-border-subtle">
           <table className="w-full text-left text-sm">
             <thead className="bg-surface-2 text-foreground-muted">
               <tr>
-                <th className="px-4 py-3 font-medium">Ad</th>
-                <th className="px-4 py-3 font-medium">E-posta</th>
-                <th className="px-4 py-3 font-medium">Rol</th>
+                <th className="px-4 py-3 font-medium">{t.kullanicilar.ad}</th>
+                <th className="px-4 py-3 font-medium">{t.kullanicilar.eposta}</th>
+                <th className="px-4 py-3 font-medium">{t.kullanicilar.rol}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
@@ -114,7 +116,7 @@ export default function KullanicilarSayfasi() {
                     {k.ad}
                     {k.rol === "basvuran" && (
                       <span className="ml-2 rounded-full bg-[var(--warning-soft)] px-2 py-0.5 text-xs text-warning">
-                        Başvuran
+                        {t.ortak.roller.basvuran}
                       </span>
                     )}
                   </td>
@@ -128,7 +130,7 @@ export default function KullanicilarSayfasi() {
                     >
                       {roller.map((r) => (
                         <option key={r.value} value={r.value}>
-                          {r.label}
+                          {t.ortak.roller[r.value]}
                         </option>
                       ))}
                     </select>

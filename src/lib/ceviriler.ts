@@ -117,6 +117,12 @@ export const ceviriler = {
     sorgu: {
       baslik: "AI Sorgu",
       aciklama: "Ekosistemdeki tüm girişim verisine dayanarak serbest metinle soru sor.",
+      ornekSorular: [
+        { goster: "Hangi girişimlerin AI durumu VERI_EKSIK?", gonder: "Hangi girişimlerin AI durumu VERI_EKSIK?" },
+        { goster: "En yüksek cirolu 3 girişim hangileri?", gonder: "En yüksek cirolu 3 girişim hangileri?" },
+        { goster: "Take Off programındaki girişimler hangileri?", gonder: "Take Off programındaki girişimler hangileri?" },
+        { goster: "Son 3 aydır güncellenmeyen girişimler hangileri?", gonder: "Son 3 aydır güncellenmeyen girişimler hangileri?" },
+      ],
       yerTutucu: "Örn: Kuluçka programında son 3 aydır güncellenmeyen kaç girişim var?",
       gonder: "Gönder",
       soruBasarisiz: "Sorgu başarısız",
@@ -157,6 +163,16 @@ export const ceviriler = {
       kisaAciklama: "Kısa Açıklama",
       ekipBuyuklugu: "Ekip Büyüklüğü",
       teknoloji: "Teknoloji",
+    },
+    kullanicilar: {
+      baslik: "Kullanıcılar",
+      aciklama: "Kayıt olan kullanıcıları görüntüle ve rol ata.",
+      ad: "Ad",
+      eposta: "E-posta",
+      rol: "Rol",
+      bosDurum: "Henüz kayıtlı kullanıcı yok.",
+      kimlikDogrulanamadi: "Kimliğiniz doğrulanamadı, lütfen tekrar giriş yapın",
+      rolGuncellenemedi: "Rol güncellenemedi",
     },
   },
   en: {
@@ -270,6 +286,12 @@ export const ceviriler = {
     sorgu: {
       baslik: "AI Query",
       aciklama: "Ask a free-form question based on all venture data in the ecosystem.",
+      ornekSorular: [
+        { goster: "Which ventures have AI status DATA_MISSING?", gonder: "Hangi girişimlerin AI durumu VERI_EKSIK?" },
+        { goster: "Which are the 3 highest-revenue ventures?", gonder: "En yüksek cirolu 3 girişim hangileri?" },
+        { goster: "Which ventures are in the Take Off program?", gonder: "Take Off programındaki girişimler hangileri?" },
+        { goster: "Which ventures haven't been updated in the last 3 months?", gonder: "Son 3 aydır güncellenmeyen girişimler hangileri?" },
+      ],
       yerTutucu: "E.g.: How many ventures in the Incubation program haven't been updated in 3 months?",
       gonder: "Send",
       soruBasarisiz: "Query failed",
@@ -310,6 +332,16 @@ export const ceviriler = {
       kisaAciklama: "Short Description",
       ekipBuyuklugu: "Team Size",
       teknoloji: "Technology",
+    },
+    kullanicilar: {
+      baslik: "Users",
+      aciklama: "View registered users and assign roles.",
+      ad: "Name",
+      eposta: "Email",
+      rol: "Role",
+      bosDurum: "No registered users yet.",
+      kimlikDogrulanamadi: "Your identity could not be verified, please sign in again",
+      rolGuncellenemedi: "Could not update role",
     },
   },
 } as const;

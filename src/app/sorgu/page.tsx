@@ -6,17 +6,6 @@ import { AIYanit } from "@/components/AIYanit";
 import { supabase } from "@/lib/supabase";
 import { useCeviri } from "@/lib/ceviriler";
 
-// Bilerek çevrilmiyor: bu metinler tıklanınca AYNEN /api/sorgu'ya gönderilen
-// gerçek sorgu içeriği oluyor (salt bir arayüz etiketi değil) — çevirmek,
-// AI'a giden içeriği (ve VERI_EKSIK gibi backend'in beklediği ham değerleri)
-// değiştirip fonksiyonel davranışı etkileyebilir.
-const ORNEK_SORULAR = [
-  "Hangi girişimlerin AI durumu VERI_EKSIK?",
-  "En yüksek cirolu 3 girişim hangileri?",
-  "Take Off programındaki girişimler hangileri?",
-  "Son 3 aydır güncellenmeyen girişimler hangileri?",
-];
-
 export default function SorguSayfasi() {
   const t = useCeviri();
   const { rol } = useRole();
@@ -95,13 +84,17 @@ export default function SorguSayfasi() {
 
       <div className="mt-6 space-y-4">
         <div className="flex flex-wrap gap-2">
-          {ORNEK_SORULAR.map((s) => (
+          {t.sorgu.ornekSorular.map((s) => (
+            // goster: dile gore degisen buton metni. gonder: /api/sorgu'ya
+            // giden ve VERI_EKSIK gibi backend'in bekledigi ham degerleri
+            // icat gercek sorgu - dil ne olursa olsun HEP orijinal Turkce
+            // metin, boylece AI'a giden icerik/fonksiyonel davranis degismez.
             <button
-              key={s}
-              onClick={() => setSoru(s)}
+              key={s.goster}
+              onClick={() => setSoru(s.gonder)}
               className="rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-xs text-foreground-muted transition hover:bg-surface-2 hover:text-foreground"
             >
-              {s}
+              {s.goster}
             </button>
           ))}
         </div>
