@@ -2,23 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { supabase } from "@/lib/supabase";
 
-const SISTEM_MESAJI = `Sen bir girişim ekosistemi onay asistanısın. Bir admin, bir girişimin güncellenmiş verisini onaylamak üzere. Görevin, admin'in onay öncesi dikkat etmesi gereken noktaları kısa maddeler halinde özetlemek.
+const SISTEM_MESAJI_TR = `Sen bir girişim ekosistemi onay asistanısın. Bir admin, bir girişimin güncellenmiş verisini onaylamak üzere. Görevin, admin'in onay öncesi dikkat etmesi gereken noktaları kısa maddeler halinde özetlemek.
 Sana girişimin ŞU AN ONAYLI (canlı) verisi ile startup'ın gönderdiği BEKLEYEN TASLAK verisi ayrı ayrı verilecek. Öncelikle bu ikisi arasındaki farkları (değişen alanları) tespit edip vurgula.
 KURALLAR:
 - Sen onaylama kararını VERMİYORSUN, sadece dikkat çekilecek noktaları sıralıyorsun. Karar admin'e ait.
 - Kesin/otoriter dil kullanma; 'dikkat edilebilir', 'kontrol edilmesi önerilir' gibi öneri dili kullan.
 - En fazla 3-4 kısa madde. Önce ONAYLI ile TASLAK arasındaki somut değişiklikleri (hangi alan, eskiden ne, şimdi ne) belirt; sonra eksik alanları, eski tarihleri veya başka dikkat çeken noktaları ekle.
 - Bekleyen taslak yoksa (girişim ilk kez inceleniyorsa) bunu belirtip genel veri kalitesini değerlendir.
-- Veri gayet iyiyse bunu da olumlu bir cümleyle belirt.`;
+- Veri gayet iyiyse bunu da olumlu bir cümleyle belirt.
+- Türkçe, net ve kısa yanıtla.`;
+
+const SISTEM_MESAJI_EN = `You are a venture ecosystem approval assistant. An admin is about to approve an updated data submission for a venture. Your task is to summarize, in short bullet points, what the admin should pay attention to before approving.
+You will be given the venture's CURRENTLY APPROVED (live) data and the PENDING DRAFT data submitted by the startup separately. First identify and highlight the differences (changed fields) between the two.
+RULES:
+- You are NOT making the approval decision, you are only listing points to pay attention to. The decision belongs to the admin.
+- Do not use definitive/authoritative language; use suggestion language like 'may need review', 'recommended to check'.
+- At most 3-4 short bullet points. First state the concrete changes between APPROVED and DRAFT (which field, what it was, what it is now); then add missing fields, outdated dates, or other noteworthy points.
+- If there is no pending draft (the venture is being reviewed for the first time), state this and evaluate the overall data quality.
+- If the data is quite good, state this too with a positive sentence.
+- Respond in English, clearly and concisely.`;
 
 export async function POST(request: NextRequest) {
   let girisim_id: string | undefined;
+  let dil: string | undefined;
   try {
     const body = await request.json();
     girisim_id = body.girisim_id;
+    dil = body.dil;
   } catch {
     return NextResponse.json({ error: "Geçersiz istek gövdesi" }, { status: 400 });
   }
+  const ingilizce = dil === "en";
 
   if (!girisim_id) {
     return NextResponse.json({ error: "girisim_id gerekli" }, { status: 400 });
@@ -59,7 +73,7 @@ ${JSON.stringify(gecmisRes.data ?? [], null, 2)}`;
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 300,
-      system: SISTEM_MESAJI,
+      system: ingilizce ? SISTEM_MESAJI_EN : SISTEM_MESAJI_TR,
       messages: [{ role: "user", content: kullaniciMesaji }],
     });
 

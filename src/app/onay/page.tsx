@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRole } from "@/context/RoleContext";
 import { supabase } from "@/lib/supabase";
 import { useCeviri, ceviriler } from "@/lib/ceviriler";
+import { useDil } from "@/context/DilContext";
 import type { Girisim, GirisimBekleyenVeri } from "@/lib/types";
 
 type CeviriSozlugu = typeof ceviriler.tr;
@@ -51,6 +52,7 @@ function degisenAlanlar(g: Girisim, t: CeviriSozlugu): AlanFarki[] {
 
 export default function OnaySayfasi() {
   const t = useCeviri();
+  const { dil } = useDil();
   const { rol } = useRole();
 
   const [girisimler, setGirisimler] = useState<Girisim[]>([]);
@@ -146,7 +148,7 @@ export default function OnaySayfasi() {
       const res = await fetch("/api/onay-ozeti", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ girisim_id: id }),
+        body: JSON.stringify({ girisim_id: id, dil }),
       });
       const veri = await res.json();
       if (!res.ok) {
@@ -202,11 +204,13 @@ export default function OnaySayfasi() {
               <div>
                 <p className="font-semibold text-foreground">{g.ad}</p>
                 <p className="text-sm text-foreground-muted">
-                  {g.sektor ?? t.onay.sektorBelirtilmemis}
+                  {(dil === "en" ? (g.sektor_en ?? g.sektor) : g.sektor) ?? t.onay.sektorBelirtilmemis}
                   {g.son_guncelleme ? ` · ${t.onay.guncelleme}: ${g.son_guncelleme}` : ""}
                 </p>
-                {g.kisa_aciklama && (
-                  <p className="mt-1 text-sm text-foreground-muted">{g.kisa_aciklama}</p>
+                {(dil === "en" ? (g.kisa_aciklama_en ?? g.kisa_aciklama) : g.kisa_aciklama) && (
+                  <p className="mt-1 text-sm text-foreground-muted">
+                    {dil === "en" ? (g.kisa_aciklama_en ?? g.kisa_aciklama) : g.kisa_aciklama}
+                  </p>
                 )}
               </div>
               <div className="flex shrink-0 gap-2">

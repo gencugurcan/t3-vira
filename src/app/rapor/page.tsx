@@ -5,6 +5,7 @@ import { useRole } from "@/context/RoleContext";
 import { AIYanit } from "@/components/AIYanit";
 import { supabase } from "@/lib/supabase";
 import { useCeviri } from "@/lib/ceviriler";
+import { useDil } from "@/context/DilContext";
 import type { SabitliSorgu } from "@/lib/types";
 
 function RaporGoster({ metin }: { metin: string }) {
@@ -68,6 +69,7 @@ function SabitliSoruKarti({
   // "mount'ta veri çek" desenini bozmadan yeniden sorgulama sağlar.
   const [tetikleyici, setTetikleyici] = useState(0);
   const t = useCeviri();
+  const { dil } = useDil();
 
   useEffect(() => {
     async function cevabiGetir() {
@@ -75,7 +77,7 @@ function SabitliSoruKarti({
         const res = await fetch("/api/sorgu", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ soru: soru.soru_metni }),
+          body: JSON.stringify({ soru: soru.soru_metni, dil }),
         });
         const veri = await res.json();
         if (!res.ok) throw new Error(veri.error ?? t.sorgu.soruBasarisiz);
@@ -87,7 +89,7 @@ function SabitliSoruKarti({
       }
     }
     cevabiGetir();
-  }, [soru.soru_metni, tetikleyici]);
+  }, [soru.soru_metni, tetikleyici, dil]);
 
   function yenile() {
     setYukleniyor(true);
@@ -180,6 +182,7 @@ function SabitliSoruKarti({
 export default function RaporSayfasi() {
   const t = useCeviri();
   const { rol } = useRole();
+  const { dil } = useDil();
 
   const [rapor, setRapor] = useState<string | null>(null);
   const [yukleniyor, setYukleniyor] = useState(false);
@@ -227,7 +230,11 @@ export default function RaporSayfasi() {
     setHata(null);
     setRapor(null);
     try {
-      const res = await fetch("/api/rapor", { method: "POST" });
+      const res = await fetch("/api/rapor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dil }),
+      });
       const veri = await res.json();
       if (!res.ok) {
         throw new Error(veri.error ?? t.rapor.raporOlusturulamadi);

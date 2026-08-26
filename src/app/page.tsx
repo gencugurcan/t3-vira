@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { AiDurumRozeti, DurumRozeti } from "@/components/Rozet";
 import { useCeviri } from "@/lib/ceviriler";
 import { useOturum } from "@/context/OturumContext";
+import { useDil } from "@/context/DilContext";
 import type { Girisim, GirisimDurum, Program } from "@/lib/types";
 
 const MotionLink = motion.create(Link);
@@ -59,6 +60,7 @@ function IconX({ className }: { className?: string }) {
 export default function AnaSayfa() {
   const t = useCeviri();
   const { oturum } = useOturum();
+  const { dil } = useDil();
   const azaltilmisHareket = useReducedMotion();
 
   const baslikVariants = {
@@ -157,6 +159,29 @@ export default function AnaSayfa() {
     [girisimler],
   );
 
+  // EN moduna geçince sektor filtre listesi ve etiketleri de Türkçe kalmasın
+  // diye: filtreleme değeri hep TR sektor string'i olarak kalır (veriyle
+  // eşleşsin diye), sadece GÖSTERİLEN metin bu haritadan İngilizce'ye çevrilir.
+  const sektorEnHaritasi = useMemo(() => {
+    const harita = new Map<string, string>();
+    girisimler.forEach((g) => {
+      if (g.sektor && g.sektor_en) harita.set(g.sektor, g.sektor_en);
+    });
+    return harita;
+  }, [girisimler]);
+
+  function sektorEtiketi(sektorTr: string) {
+    return dil === "en" ? (sektorEnHaritasi.get(sektorTr) ?? sektorTr) : sektorTr;
+  }
+
+  function girisimSektoru(g: Girisim) {
+    return dil === "en" ? (g.sektor_en ?? g.sektor) : g.sektor;
+  }
+
+  function girisimAciklamasi(g: Girisim) {
+    return dil === "en" ? (g.kisa_aciklama_en ?? g.kisa_aciklama) : g.kisa_aciklama;
+  }
+
   const filtrelenmis = useMemo(() => {
     const aramaTerimi = arama.trim().toLocaleLowerCase("tr");
     return girisimler.filter((g) => {
@@ -206,7 +231,7 @@ export default function AnaSayfa() {
   if (sektorFiltre) {
     aktifFiltreler.push({
       anahtar: "sektor",
-      etiket: `${t.anaSayfa.sektorEtiketi}: ${sektorFiltre}`,
+      etiket: `${t.anaSayfa.sektorEtiketi}: ${sektorEtiketi(sektorFiltre)}`,
       kaldir: () => setSektorFiltre(""),
     });
   }
@@ -327,7 +352,7 @@ export default function AnaSayfa() {
               <option value="">{t.anaSayfa.tumSektorler}</option>
               {sektorler.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {sektorEtiketi(s)}
                 </option>
               ))}
             </select>
@@ -497,13 +522,13 @@ export default function AnaSayfa() {
                 </div>
 
                 <p className="mt-1.5 text-sm text-foreground-muted">
-                  {g.sektor ?? t.anaSayfa.sektorBelirtilmemis}
+                  {girisimSektoru(g) ?? t.anaSayfa.sektorBelirtilmemis}
                   {g.kurulus_yili ? ` · ${g.kurulus_yili}` : ""}
                 </p>
 
-                {g.kisa_aciklama && (
+                {girisimAciklamasi(g) && (
                   <p className="mt-3 line-clamp-2 text-sm text-foreground-muted">
-                    {g.kisa_aciklama}
+                    {girisimAciklamasi(g)}
                   </p>
                 )}
 

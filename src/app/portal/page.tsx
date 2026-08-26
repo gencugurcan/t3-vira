@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRole } from "@/context/RoleContext";
+import { useCeviri } from "@/lib/ceviriler";
 import { supabase } from "@/lib/supabase";
 import type { Girisim, Program } from "@/lib/types";
 
@@ -76,6 +77,7 @@ function girisimdenFormaCevir(g: Girisim): Form {
 
 export default function PortalSayfasi() {
   const { rol } = useRole();
+  const t = useCeviri();
 
   const [girisimler, setGirisimler] = useState<Girisim[]>([]);
   const [seciliId, setSeciliId] = useState<string>("");
@@ -137,17 +139,17 @@ export default function PortalSayfasi() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8">
         <p className="rounded-lg bg-[var(--warning-soft)] px-4 py-3 text-sm text-warning">
-          Bu sayfa sadece Startup ve Program Yöneticisi rolleri içindir.
+          {t.portal.sadeceStartupProgramYoneticisi}
         </p>
       </div>
     );
   }
 
-  const baslik = rol === "program_yoneticisi" ? "Program Yönetimi" : "Startup Portalı";
+  const baslik = rol === "program_yoneticisi" ? t.portal.baslikProgramYoneticisi : t.portal.baslikStartup;
   const aciklama =
     rol === "program_yoneticisi"
-      ? "Sorumlu olduğun programdaki girişimleri ekle, güncelle, program notu ekle."
-      : "Girişim bilgilerini güncelle. Kaydettiğinde değişiklikler admin onayına düşer.";
+      ? t.portal.aciklamaProgramYoneticisi
+      : t.portal.aciklamaStartup;
 
   const seciliGirisim = girisimler.find((g) => g.id === seciliId) ?? null;
   const bekleyenVarMi = !!seciliGirisim?.bekleyen_veri;
@@ -195,9 +197,7 @@ export default function PortalSayfasi() {
     if (error) {
       setHata(error.message);
     } else {
-      setMesaj(
-        "Değişiklikler admin onayına gönderildi. Onaylanana kadar ekosistemde eski (onaylı) bilgilerin görünmeye devam edeceğini unutma.",
-      );
+      setMesaj(t.portal.kaydedildiMesaj);
       setGirisimler((prev) =>
         prev.map((g) =>
           g.id === seciliId
@@ -238,7 +238,7 @@ export default function PortalSayfasi() {
     if (error) {
       setYeniGirisimHata(error.message);
     } else if (data) {
-      setYeniGirisimMesaj("Girişim eklendi, admin onayına düştü.");
+      setYeniGirisimMesaj(t.portal.girisimEklendiMesaj);
       setYeniGirisimForm(BOS_YENI_GIRISIM_FORM);
       setGirisimler((prev) =>
         [...prev, data as Girisim].sort((a, b) => a.ad.localeCompare(b.ad, "tr")),
@@ -264,7 +264,7 @@ export default function PortalSayfasi() {
     if (error) {
       setNotHata(error.message);
     } else {
-      setNotMesaj("Not eklendi.");
+      setNotMesaj(t.portal.notEklendiMesaj);
       setNotForm(BOS_NOT_FORM);
     }
     setNotKaydediliyor(false);
@@ -285,7 +285,7 @@ export default function PortalSayfasi() {
     if (error) {
       setBelgeHata(error.message);
     } else {
-      setBelgeMesaj("Belge eklendi.");
+      setBelgeMesaj(t.portal.belgeEklendiMesaj);
       setBelgeForm(BOS_BELGE_FORM);
     }
     setBelgeKaydediliyor(false);
@@ -296,17 +296,17 @@ export default function PortalSayfasi() {
       <h1 className="text-2xl font-bold text-foreground">{baslik}</h1>
       <p className="mt-1 text-sm text-foreground-muted">{aciklama}</p>
 
-      {yukleniyor && <p className="mt-6 text-sm text-foreground-muted">Yükleniyor...</p>}
+      {yukleniyor && <p className="mt-6 text-sm text-foreground-muted">{t.ortak.yukleniyor}</p>}
 
       {!yukleniyor && girisimler.length === 0 && !hata && (
-        <p className="mt-6 text-sm text-foreground-muted">Kayıtlı girişim bulunamadı.</p>
+        <p className="mt-6 text-sm text-foreground-muted">{t.portal.kayitliGirisimYok}</p>
       )}
 
       {!yukleniyor && girisimler.length > 0 && (
         <div className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
           <div>
             <label className="block text-sm font-medium text-foreground-muted">
-              Girişim Seç
+              {t.portal.girisimSec}
             </label>
             <select
               value={seciliId}
@@ -323,14 +323,12 @@ export default function PortalSayfasi() {
 
           {bekleyenVarMi && (
             <p className="rounded-lg bg-[var(--warning-soft)] px-3 py-2 text-sm text-warning">
-              Bu girişim için gönderdiğin bir değişiklik hâlâ admin onayında. Aşağıda
-              son gönderdiğin taslağı görüyorsun; ekosistemde ise onaylanana kadar
-              eski (onaylı) bilgiler görünmeye devam ediyor.
+              {t.portal.bekleyenUyari}
             </p>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-foreground-muted">Ad</label>
+            <label className="block text-sm font-medium text-foreground-muted">{t.portal.ad}</label>
             <input
               type="text"
               value={form.ad}
@@ -340,7 +338,7 @@ export default function PortalSayfasi() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground-muted">Sektör</label>
+            <label className="block text-sm font-medium text-foreground-muted">{t.portal.sektor}</label>
             <input
               type="text"
               value={form.sektor}
@@ -351,7 +349,7 @@ export default function PortalSayfasi() {
 
           <div>
             <label className="block text-sm font-medium text-foreground-muted">
-              Kısa Açıklama
+              {t.portal.kisaAciklama}
             </label>
             <textarea
               value={form.kisa_aciklama}
@@ -363,7 +361,7 @@ export default function PortalSayfasi() {
 
           <div>
             <label className="block text-sm font-medium text-foreground-muted">
-              Ekip Büyüklüğü
+              {t.portal.ekipBuyuklugu}
             </label>
             <input
               type="number"
@@ -375,13 +373,13 @@ export default function PortalSayfasi() {
 
           <div>
             <label className="block text-sm font-medium text-foreground-muted">
-              Teknoloji (virgülle ayır)
+              {t.portal.teknolojiEtiket}
             </label>
             <input
               type="text"
               value={form.teknoloji}
               onChange={(e) => setForm({ ...form, teknoloji: e.target.value })}
-              placeholder="Örn: Python, React, IoT"
+              placeholder={t.portal.teknolojiOrnek}
               className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
             />
           </div>
@@ -393,7 +391,7 @@ export default function PortalSayfasi() {
           )}
           {hata && (
             <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
-              Hata: {hata}
+              {t.portal.hataOnEk} {hata}
             </p>
           )}
 
@@ -402,7 +400,7 @@ export default function PortalSayfasi() {
             disabled={kaydediliyor}
             className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
-            {kaydediliyor ? "Kaydediliyor..." : "Kaydet"}
+            {kaydediliyor ? t.portal.kaydediliyor : t.portal.kaydet}
           </button>
         </div>
       )}
@@ -413,16 +411,16 @@ export default function PortalSayfasi() {
             onClick={() => setYeniGirisimAcik((v) => !v)}
             className="flex w-full items-center justify-between text-left"
           >
-            <span className="text-lg font-semibold text-foreground">Yeni Girişim Ekle</span>
+            <span className="text-lg font-semibold text-foreground">{t.portal.yeniGirisimEkleBaslik}</span>
             <span className="text-sm text-foreground-muted">
-              {yeniGirisimAcik ? "Kapat" : "Aç"}
+              {yeniGirisimAcik ? t.portal.kapat : t.portal.ac}
             </span>
           </button>
 
           {yeniGirisimAcik && (
             <div className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-foreground-muted">Ad</label>
+                <label className="block text-sm font-medium text-foreground-muted">{t.portal.ad}</label>
                 <input
                   type="text"
                   value={yeniGirisimForm.ad}
@@ -435,7 +433,7 @@ export default function PortalSayfasi() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground-muted">
-                  Sektör
+                  {t.portal.sektor}
                 </label>
                 <input
                   type="text"
@@ -449,7 +447,7 @@ export default function PortalSayfasi() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground-muted">
-                  Kuruluş Yılı
+                  {t.portal.kurulusYili}
                 </label>
                 <input
                   type="number"
@@ -463,7 +461,7 @@ export default function PortalSayfasi() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground-muted">
-                  Kısa Açıklama
+                  {t.portal.kisaAciklama}
                 </label>
                 <textarea
                   value={yeniGirisimForm.kisa_aciklama}
@@ -477,7 +475,7 @@ export default function PortalSayfasi() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground-muted">
-                  Ekip Büyüklüğü
+                  {t.portal.ekipBuyuklugu}
                 </label>
                 <input
                   type="number"
@@ -491,7 +489,7 @@ export default function PortalSayfasi() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground-muted">
-                  Teknoloji (virgülle ayır)
+                  {t.portal.teknolojiEtiket}
                 </label>
                 <input
                   type="text"
@@ -499,7 +497,7 @@ export default function PortalSayfasi() {
                   onChange={(e) =>
                     setYeniGirisimForm({ ...yeniGirisimForm, teknoloji: e.target.value })
                   }
-                  placeholder="Örn: Python, React, IoT"
+                  placeholder={t.portal.teknolojiOrnek}
                   className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
                 />
               </div>
@@ -511,7 +509,7 @@ export default function PortalSayfasi() {
               )}
               {yeniGirisimHata && (
                 <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
-                  Hata: {yeniGirisimHata}
+                  {t.portal.hataOnEk} {yeniGirisimHata}
                 </p>
               )}
 
@@ -520,7 +518,7 @@ export default function PortalSayfasi() {
                 disabled={yeniGirisimKaydediliyor || !yeniGirisimForm.ad.trim()}
                 className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
               >
-                {yeniGirisimKaydediliyor ? "Ekleniyor..." : "Girişim Ekle"}
+                {yeniGirisimKaydediliyor ? t.portal.ekleniyor : t.portal.girisimEkleButonu}
               </button>
             </div>
           )}
@@ -530,22 +528,22 @@ export default function PortalSayfasi() {
       {!yukleniyor && rol === "program_yoneticisi" && girisimler.length > 0 && (
         <div className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Program Notu Ekle</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t.portal.programNotuEkleBaslik}</h2>
             <p className="mt-1 text-sm text-foreground-muted">
-              Girişim: <span className="text-foreground">{seciliGirisim?.ad}</span>
+              {t.portal.girisimEtiketi} <span className="text-foreground">{seciliGirisim?.ad}</span>
             </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground-muted">
-              Program Seç
+              {t.portal.programSec}
             </label>
             <select
               value={notForm.programId}
               onChange={(e) => setNotForm({ ...notForm, programId: e.target.value })}
               className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
             >
-              <option value="">Seç...</option>
+              <option value="">{t.portal.secSecenegi}</option>
               {programlar.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.ad}
@@ -555,30 +553,30 @@ export default function PortalSayfasi() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground-muted">Dönem</label>
+            <label className="block text-sm font-medium text-foreground-muted">{t.portal.donem}</label>
             <input
               type="text"
               value={notForm.donem}
               onChange={(e) => setNotForm({ ...notForm, donem: e.target.value })}
-              placeholder="Örn: 2024 Güz"
+              placeholder={t.portal.donemOrnek}
               className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground-muted">Durum</label>
+            <label className="block text-sm font-medium text-foreground-muted">{t.portal.durum}</label>
             <input
               type="text"
               value={notForm.durum}
               onChange={(e) => setNotForm({ ...notForm, durum: e.target.value })}
-              placeholder="Örn: devam_ediyor"
+              placeholder={t.portal.durumOrnek}
               className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground-muted">
-              Önemli Adımlar
+              {t.portal.onemliAdimlar}
             </label>
             <textarea
               value={notForm.onemliAdimlar}
@@ -595,7 +593,7 @@ export default function PortalSayfasi() {
           )}
           {notHata && (
             <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
-              Hata: {notHata}
+              {t.portal.hataOnEk} {notHata}
             </p>
           )}
 
@@ -604,7 +602,7 @@ export default function PortalSayfasi() {
             disabled={notKaydediliyor || !notForm.programId}
             className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
-            {notKaydediliyor ? "Kaydediliyor..." : "Not Ekle"}
+            {notKaydediliyor ? t.portal.kaydediliyor : t.portal.notEkleButonu}
           </button>
         </div>
       )}
@@ -612,32 +610,32 @@ export default function PortalSayfasi() {
       {!yukleniyor && rol === "startup" && girisimler.length > 0 && (
         <div className="mt-6 space-y-4 rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Belge Ekle</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t.portal.belgeEkleBaslik}</h2>
             <p className="mt-1 text-sm text-foreground-muted">
-              Girişim: <span className="text-foreground">{seciliGirisim?.ad}</span>
+              {t.portal.girisimEtiketi} <span className="text-foreground">{seciliGirisim?.ad}</span>
             </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground-muted">
-              Dosya Adı
+              {t.portal.dosyaAdi}
             </label>
             <input
               type="text"
               value={belgeForm.dosya}
               onChange={(e) => setBelgeForm({ ...belgeForm, dosya: e.target.value })}
-              placeholder="Örn: sunum.pdf"
+              placeholder={t.portal.dosyaOrnek}
               className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground-muted">Tür</label>
+            <label className="block text-sm font-medium text-foreground-muted">{t.portal.tur}</label>
             <input
               type="text"
               value={belgeForm.tur}
               onChange={(e) => setBelgeForm({ ...belgeForm, tur: e.target.value })}
-              placeholder="Örn: Sunum"
+              placeholder={t.portal.turOrnek}
               className="mt-1 w-full rounded-lg border border-border-subtle bg-surface-2 px-3 py-2 text-sm text-foreground"
             />
           </div>
@@ -649,7 +647,7 @@ export default function PortalSayfasi() {
           )}
           {belgeHata && (
             <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">
-              Hata: {belgeHata}
+              {t.portal.hataOnEk} {belgeHata}
             </p>
           )}
 
@@ -658,7 +656,7 @@ export default function PortalSayfasi() {
             disabled={belgeKaydediliyor || !belgeForm.dosya.trim()}
             className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
-            {belgeKaydediliyor ? "Kaydediliyor..." : "Belge Ekle"}
+            {belgeKaydediliyor ? t.portal.kaydediliyor : t.portal.belgeEkleBaslik}
           </button>
         </div>
       )}

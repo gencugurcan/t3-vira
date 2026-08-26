@@ -85,9 +85,7 @@ export default function KullanicilarSayfasi() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="mb-1 text-2xl font-semibold text-foreground">{t.kullanicilar.baslik}</h1>
-      <p className="mb-6 text-sm text-foreground-muted">
-        {t.kullanicilar.aciklama}
-      </p>
+      <p className="mb-6 text-sm text-foreground-muted">{t.kullanicilar.aciklama}</p>
 
       {hata && (
         <p className="mb-4 rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-sm text-danger">

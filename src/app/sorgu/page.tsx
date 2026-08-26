@@ -5,10 +5,12 @@ import { useRole } from "@/context/RoleContext";
 import { AIYanit } from "@/components/AIYanit";
 import { supabase } from "@/lib/supabase";
 import { useCeviri } from "@/lib/ceviriler";
+import { useDil } from "@/context/DilContext";
 
 export default function SorguSayfasi() {
   const t = useCeviri();
   const { rol } = useRole();
+  const { dil } = useDil();
 
   const [soru, setSoru] = useState("");
   const [gonderilenSoru, setGonderilenSoru] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export default function SorguSayfasi() {
       const res = await fetch("/api/sorgu", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ soru }),
+        body: JSON.stringify({ soru, dil }),
       });
       const veri = await res.json();
       if (!res.ok) {
