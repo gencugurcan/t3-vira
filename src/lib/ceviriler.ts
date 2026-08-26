@@ -35,7 +35,6 @@ export const ceviriler = {
       veriEksik: "Veri Eksik",
     },
     anaSayfa: {
-      tekrarHosGeldin: "Tekrar hoş geldin",
       baslik: "Girişimler",
       altBaslik: "Ekosistemdeki tüm girişimleri görüntüle ve filtrele.",
       toplamGirisim: "Toplam Girişim",
@@ -85,6 +84,7 @@ export const ceviriler = {
       degerlendirmeBasarisiz: "Değerlendirme başarısız",
     },
     ortak: {
+      tekrarHosGeldin: "Tekrar hoş geldin",
       hata: "Hata",
       bilinmeyenHata: "Bilinmeyen hata",
       yukleniyor: "Yükleniyor...",
@@ -205,7 +205,6 @@ export const ceviriler = {
       veriEksik: "Data Missing",
     },
     anaSayfa: {
-      tekrarHosGeldin: "Welcome back",
       baslik: "Ventures",
       altBaslik: "View and filter all ventures in the ecosystem.",
       toplamGirisim: "Total Ventures",
@@ -255,6 +254,7 @@ export const ceviriler = {
       degerlendirmeBasarisiz: "Evaluation failed",
     },
     ortak: {
+      tekrarHosGeldin: "Welcome back",
       hata: "Error",
       bilinmeyenHata: "Unknown error",
       yukleniyor: "Loading...",

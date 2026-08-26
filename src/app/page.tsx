@@ -249,7 +249,7 @@ export default function AnaSayfa() {
             // GitHub tarzı kişisel karşılama - sadece dil/tema gibi tercih
             // metinleri degil, oturumdaki gercek kullanici adiyla.
             <p className="text-sm font-medium text-accent">
-              {t.anaSayfa.tekrarHosGeldin}, {oturum.ad}
+              {t.ortak.tekrarHosGeldin}, {oturum.ad}
             </p>
           )}
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground">

@@ -21,7 +21,9 @@ export function RoleSwitcher() {
   return (
     <div className="space-y-2 text-sm">
       <div className="leading-tight">
-        <p className="text-foreground">{oturum.ad}</p>
+        <p className="text-foreground">
+          {t.ortak.tekrarHosGeldin}, {oturum.ad}
+        </p>
         <p className="text-xs text-foreground-muted">{rolEtiketi}</p>
       </div>
       <button
